@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A source-attributed Google Cloud Professional Cloud Architect practice quiz.">
+    <title>Google Cloud Professional Cloud Architect Quiz</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="quiz-shell">
+      <header class="hero">
+        <p class="eyebrow">Google Cloud Professional Cloud Architect</p>
+        <h1>PCA Practice Quiz</h1>
+        <p class="lede">Practice architecture decisions across the Professional Cloud Architect exam domains. Every correct and incorrect choice is explained and linked to Google Cloud documentation.</p>
+      </header>
+
+      <section class="card" aria-live="polite">
+        <div class="stats-row">
+          <p id="question-count">Question 0 / 0</p>
+          <p id="score">Score: 0 / 0</p>
+        </div>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <h2 id="empty-state-title"></h2>
+          <p id="empty-state-copy"></p>
+        </div>
+
+        <div id="quiz-panel">
+          <h2 id="prompt" class="prompt"></h2>
+          <div id="answers" class="answers"></div>
+          <div id="explanations" class="explanations" hidden></div>
+          <p id="question-source" class="question-source"></p>
+          <button id="next-button" class="primary-button" type="button" disabled>Next</button>
+        </div>
+      </section>
+
+      <footer class="footer-actions">
+        <p id="bank-status"></p>
+        <button id="reset-button" class="text-button" type="button">Reset progress</button>
+      </footer>
+    </main>
+
+    <script src="question-schema.js"></script>
+    <script src="question-bank/sources.js"></script>
+    <script src="question-bank/architecture.js"></script>
+    <script src="question-bank/infrastructure.js"></script>
+    <script src="question-bank/security.js"></script>
+    <script src="question-bank/operations.js"></script>
+    <script src="question-bank/implementation.js"></script>
+    <script src="question-bank/reliability.js"></script>
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
