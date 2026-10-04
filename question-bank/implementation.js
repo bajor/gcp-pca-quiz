@@ -68,6 +68,32 @@
       correct: 0,
       tags: ["manage-implementation", "automation"],
       source: S.CLOUD_SCHEDULER
+    },
+    {
+      id: "implementation-cloud-build-private-pool",
+      prompt: "A Cloud Build pipeline must reach a private GKE control-plane endpoint and an on-premises artifact repository through an existing VPC and Interconnect connection. Build workers must have no public egress. Which implementation should be used?",
+      answers: [
+        { text: "Run the builds in the default Cloud Build pool and add the workers' changing public addresses to firewall allowlists", explanation: "Incorrect. Default-pool workers are not attached to the private VPC path, and public allowlists violate the no-public-egress requirement." },
+        { text: "Create a Cloud Build private pool connected to the VPC, configure private routes, DNS, and firewall access, and select that pool in the build", explanation: "Correct. Private pools provide dedicated workers that can connect to a VPC for access to private GKE and hybrid resources, and they can be configured without public egress." },
+        { text: "Make the GKE control plane and artifact repository public for the duration of every build", explanation: "Incorrect. Temporarily exposing private management and artifact endpoints contradicts the network requirement and increases attack surface." },
+        { text: "Use a larger Cloud Build machine type in the default pool", explanation: "Incorrect. Worker CPU and memory sizing does not provide private VPC or on-premises connectivity." }
+      ],
+      correct: 1,
+      tags: ["manage-implementation", "ci-cd", "networking", "advanced"],
+      source: S.CLOUD_BUILD_PRIVATE_POOLS
+    },
+    {
+      id: "implementation-binary-authorization-attestation",
+      prompt: "Production GKE clusters must reject any container image that has not passed security testing and approval. The control must bind approval to the immutable image digest so moving a tag cannot bypass it. Which implementation meets the requirement?",
+      answers: [
+        { text: "Allow deployment of any image whose tag is named production", explanation: "Incorrect. Tags are mutable and can be moved to an unapproved image digest." },
+        { text: "Grant all developers Artifact Registry Reader on the production repository", explanation: "Incorrect. Repository read access does not certify an image or enforce deployment policy at the cluster." },
+        { text: "Have the CI process create a Binary Authorization attestation for the tested image digest and require that attestor in the production policy", explanation: "Correct. The attestation certifies the immutable digest, and Binary Authorization verifies the required attestor before allowing deployment." },
+        { text: "Enable vulnerability scanning but allow every scanned image to deploy", explanation: "Incorrect. Scanning produces findings, but without an admission policy tied to approval it does not reject images that failed the required process." }
+      ],
+      correct: 2,
+      tags: ["manage-implementation", "ci-cd", "supply-chain-security", "advanced"],
+      source: S.BINARY_AUTHORIZATION
     }
   ];
 })();

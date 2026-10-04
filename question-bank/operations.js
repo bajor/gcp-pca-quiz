@@ -120,6 +120,45 @@
       correct: 0,
       tags: ["analyze-optimize", "observability", "reliability"],
       source: S.SERVICE_MONITORING
+    },
+    {
+      id: "operations-organization-aggregated-log-sink",
+      prompt: "A security operations project contains a central log bucket. It must receive matching audit logs from every current and future project under the organization. A newly created organization-level sink exists, but no logs arrive at the destination. Which configuration is required?",
+      answers: [
+        { text: "Create the sink as an aggregated organization sink that includes children and grant its writer identity permission to write to the destination log bucket", explanation: "Correct. An aggregated sink routes matching logs from descendant resources, and its unique writer identity must have the destination permission, such as Logs Bucket Writer for a log bucket." },
+        { text: "Add the security project to a Cloud Monitoring metrics scope", explanation: "Incorrect. A metrics scope controls visibility of monitoring time series and does not route log entries or authorize a sink destination." },
+        { text: "Grant every project owner access to the central bucket and wait for logs to be copied automatically", explanation: "Incorrect. User access to the bucket neither creates an organization-wide route nor authorizes the sink's writer identity." },
+        { text: "Enable a billing export in every project", explanation: "Incorrect. Billing exports provide cost data, not centralized Cloud Audit Logs routing." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "observability", "logging", "advanced"],
+      source: S.AGGREGATED_LOG_SINKS
+    },
+    {
+      id: "operations-bigquery-reservation-isolation",
+      prompt: "A company uses BigQuery capacity pricing. Executive dashboards need predictable slot availability, while bursty ETL jobs may scale when capacity is available but must not consume the dashboard baseline. Which workload-management design best fits?",
+      answers: [
+        { text: "Assign the workloads to separate reservations, give dashboards adequate baseline slots, and configure bounded ETL autoscaling with ignore_idle_slots enabled", explanation: "Correct. Separate reservations and assignments isolate the workloads, dashboard baseline slots provide predictable capacity, and ignore_idle_slots prevents the ETL reservation from borrowing that baseline while ETL can autoscale to its configured maximum." },
+        { text: "Put all jobs in one reservation and use query labels to reserve slots for dashboards", explanation: "Incorrect. Labels help categorize jobs but do not reserve or isolate slot capacity." },
+        { text: "Switch every workload to on-demand pricing because on-demand jobs have dedicated dashboard slots", explanation: "Incorrect. On-demand pricing does not create dedicated capacity isolation between these workloads." },
+        { text: "Partition the dashboard tables and allow ETL jobs unlimited slots in the same reservation", explanation: "Incorrect. Partitioning can reduce scanned data, but it does not guarantee that ETL cannot contend for the dashboard reservation's compute capacity." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "analytics", "performance", "advanced"],
+      source: S.BIGQUERY_SLOTS
+    },
+    {
+      id: "operations-bigquery-materialized-view-rewrite",
+      prompt: "Analysts repeatedly run compatible aggregate queries over a large append-only BigQuery fact table. They need current results with lower compute cost and cannot update every existing query immediately. Which optimization should be evaluated first?",
+      answers: [
+        { text: "Create a logical view containing the aggregate", explanation: "Incorrect. A logical view stores SQL but generally recomputes its query and does not precompute results." },
+        { text: "Export the table to Cloud Storage before each query", explanation: "Incorrect. Exporting adds data movement and does not accelerate or reduce the cost of the existing BigQuery aggregate queries." },
+        { text: "Create an incremental materialized view that is eligible for smart tuning", explanation: "Correct. BigQuery can incrementally maintain a materialized view and automatically rewrite compatible queries to use it, reducing work without requiring each query to reference the view directly." },
+        { text: "Disable the query cache so each aggregate reads the newest table data", explanation: "Incorrect. Disabling cache increases repeated computation and does not provide precomputed incremental aggregates." }
+      ],
+      correct: 2,
+      tags: ["analyze-optimize", "analytics", "cost-optimization", "advanced"],
+      source: S.BIGQUERY_MATERIALIZED_VIEWS
     }
   ];
 })();

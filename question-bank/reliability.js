@@ -94,6 +94,45 @@
       correct: 2,
       tags: ["reliability", "sre", "delivery"],
       source: S.SERVICE_MONITORING
+    },
+    {
+      id: "reliability-storage-dual-region-turbo-replication",
+      prompt: "A media service stores newly uploaded objects in Cloud Storage. It requires automatic regional failover without changing bucket paths and an SLA-backed recovery point objective of no more than 15 minutes for new objects. Which storage design meets both requirements?",
+      answers: [
+        { text: "A regional bucket with object versioning", explanation: "Incorrect. Versioning protects object generations but does not replicate the bucket across regions." },
+        { text: "Two regional buckets copied nightly by Storage Transfer Service", explanation: "Incorrect. Nightly copying cannot meet a 15-minute recovery point objective and requires application-level destination failover." },
+        { text: "A multi-region bucket with default replication", explanation: "Incorrect. A multi-region bucket provides cross-region redundancy and automatic failover, but default replication does not provide the stated 15-minute replication RPO." },
+        { text: "A dual-region bucket with turbo replication enabled", explanation: "Correct. Dual-region buckets provide automatic regional failover without changing storage paths, and turbo replication provides a 15-minute RPO for newly written objects." }
+      ],
+      correct: 3,
+      tags: ["reliability", "storage", "disaster-recovery", "advanced"],
+      source: S.STORAGE_AVAILABILITY
+    },
+    {
+      id: "reliability-cloud-sql-pitr-logical-corruption",
+      prompt: "At 14:03, a faulty migration deleted valid rows from a Cloud SQL for PostgreSQL database. The error was discovered at 14:20, after high-availability standbys and read replicas had received the deletion. The team must recover the database to 14:02 while preserving the damaged instance for investigation. What should it do?",
+      answers: [
+        { text: "Trigger an HA failover to the standby", explanation: "Incorrect. High availability protects against infrastructure failure; the logical deletion is replicated to the standby." },
+        { text: "Promote a current read replica", explanation: "Incorrect. A normal read replica also receives the deletion and promotion does not rewind its state to 14:02." },
+        { text: "Use point-in-time recovery to create a new instance at 14:02, validate it, and redirect the application", explanation: "Correct. Point-in-time recovery uses retained backups and transaction logs to create a separate instance at the selected time, leaving the damaged source available for investigation." },
+        { text: "Resize the primary instance and wait for automatic row reconstruction", explanation: "Incorrect. Increasing compute capacity cannot reverse a committed logical deletion." }
+      ],
+      correct: 2,
+      tags: ["reliability", "databases", "disaster-recovery", "advanced"],
+      source: S.CLOUD_SQL_PITR
+    },
+    {
+      id: "reliability-pubsub-exactly-once-pull",
+      prompt: "A payment consumer uses a Pub/Sub push subscription and sometimes performs a side effect twice after valid message redelivery. The team wants Pub/Sub's exactly-once delivery guarantee and understands that separately published copies can still have different message IDs. Which redesign is appropriate?",
+      answers: [
+        { text: "Enable exactly-once delivery on the existing push subscription", explanation: "Incorrect. Pub/Sub exactly-once delivery is supported for pull subscriptions, not push subscriptions." },
+        { text: "Enable message ordering on the push subscription because ordering removes duplicates", explanation: "Incorrect. Ordering preserves order for an ordering key but does not provide exactly-once delivery or eliminate redeliveries." },
+        { text: "Add a dead-letter topic and treat its maximum delivery-attempt count as an exactly-once guarantee", explanation: "Incorrect. A dead-letter topic isolates messages that cannot be processed, but forwarding and delivery-attempt counts are best effort and do not prevent duplicate side effects." },
+        { text: "Switch to a pull subscription with exactly-once enabled, keep subscribers in one region, process idempotently, and acknowledge only after durable commit", explanation: "Correct. Exactly-once delivery is available for pull subscriptions and its guarantee is regional. Idempotent processing covers failures before acknowledgment and separately published copies, while acknowledging after commit avoids losing unfinished work." }
+      ],
+      correct: 3,
+      tags: ["reliability", "messaging", "pubsub", "advanced"],
+      source: S.PUBSUB_EXACTLY_ONCE
     }
   ];
 })();

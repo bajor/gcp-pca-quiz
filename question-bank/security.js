@@ -120,6 +120,58 @@
       correct: 2,
       tags: ["security-compliance", "iam", "storage"],
       source: S.UNIFORM_BUCKET_ACCESS
+    },
+    {
+      id: "security-workforce-identity-external-contractors",
+      prompt: "Contractors are people managed in a partner's SAML identity provider. They need attributable Google Cloud console and CLI access, but policy forbids creating or synchronizing Cloud Identity accounts for them. Which identity design should be used?",
+      answers: [
+        { text: "Create one Google service account key and share it with all contractors", explanation: "Incorrect. A shared workload credential is not a human identity, loses individual attribution, and creates a long-lived key risk." },
+        { text: "Use Workload Identity Federation with one workload pool for each contractor", explanation: "Incorrect. Workload Identity Federation is intended for non-human workloads, not workforce users accessing the console and CLI." },
+        { text: "Use Workforce Identity Federation with a workforce pool provider and grant IAM roles to mapped partner identities or groups", explanation: "Correct. Workforce Identity Federation authenticates external users and groups through SAML or OIDC without requiring synchronized Cloud Identity accounts, while preserving IAM authorization and audit identity." },
+        { text: "Give the partner network access through Cloud VPN and skip IAM authentication", explanation: "Incorrect. Private network connectivity does not authenticate individual users or authorize Google Cloud console and API actions." }
+      ],
+      correct: 2,
+      tags: ["security-compliance", "iam", "federation", "advanced"],
+      source: S.WORKFORCE_IDENTITY
+    },
+    {
+      id: "security-workload-identity-github-claims",
+      prompt: "A GitHub Actions workflow must deploy to Google Cloud without stored service account keys. Because GitHub is a multi-tenant OIDC issuer, tokens from other organizations or repositories must not gain access. What is the best design?",
+      answers: [
+        { text: "Use a workload identity pool provider for GitHub, map stable token claims, restrict them with an attribute condition, and grant only the matched principal access", explanation: "Correct. Workload Identity Federation exchanges GitHub OIDC credentials for short-lived Google Cloud credentials, while claim mappings and attribute conditions restrict trust to the intended organization and repository." },
+        { text: "Store a service account JSON key in an encrypted repository secret", explanation: "Incorrect. Encryption at rest does not remove the long-lived key, rotation, exfiltration, and replay risks that federation avoids." },
+        { text: "Use Workforce Identity Federation and authorize every member of the GitHub organization", explanation: "Incorrect. The caller is a deployment workload, not a human workforce user, and broad organization membership does not bind access to the intended workflow claims." },
+        { text: "Use an unrestricted workload identity pool because the OIDC issuer signature identifies the repository", explanation: "Incorrect. A valid token signature identifies the shared GitHub issuer; explicit claim mapping and conditions are needed to reject tokens from other tenants and repositories." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "iam", "federation", "ci-cd", "advanced"],
+      source: S.WORKLOAD_IDENTITY_FEDERATION
+    },
+    {
+      id: "security-kms-separation-of-duties",
+      prompt: "A security team must create, rotate, disable, and destroy Cloud KMS keys but must not decrypt application data. An application runtime must decrypt with one specific key but must not administer it. Which role assignment enforces this separation of duties?",
+      answers: [
+        { text: "Grant Cloud KMS Admin to both the security team and the runtime", explanation: "Incorrect. The runtime would receive key lifecycle administration, and Cloud KMS Admin alone does not grant direct cryptographic operations." },
+        { text: "Grant Cloud KMS CryptoKey Encrypter/Decrypter to the security team and Owner to the runtime", explanation: "Incorrect. This reverses the intended duties and gives the runtime excessive project-wide control." },
+        { text: "Grant Cloud KMS Admin to the security team and Cloud KMS CryptoKey Decrypter to the runtime on the specific key", explanation: "Correct. Cloud KMS Admin manages key lifecycle without direct decrypt permission, while the key-scoped Decrypter role lets the runtime decrypt without administering the key." },
+        { text: "Grant Secret Manager Secret Accessor to both principals", explanation: "Incorrect. Secret Manager roles do not provide Cloud KMS key administration or cryptographic use permissions." }
+      ],
+      correct: 2,
+      tags: ["security-compliance", "encryption", "iam", "advanced"],
+      source: S.KMS_SEPARATION_DUTIES
+    },
+    {
+      id: "security-vpc-service-controls-dry-run",
+      prompt: "An enterprise is adding existing BigQuery and Cloud Storage projects to a VPC Service Controls perimeter. Unknown production data flows make immediate enforcement too risky, but the security team needs evidence of which requests the proposed policy would deny. What should it do first?",
+      answers: [
+        { text: "Enforce the perimeter immediately and remove projects whenever an application fails", explanation: "Incorrect. Immediate enforcement can interrupt legitimate flows before the required ingress, egress, and access-level rules are understood." },
+        { text: "Create the proposed perimeter in dry run mode, exercise production use cases, analyze policy violation logs, and then enforce the corrected configuration", explanation: "Correct. Dry run mode logs requests that would violate the proposed perimeter without blocking them, allowing the team to refine rules before enforcement." },
+        { text: "Enable Data Access audit logs instead of configuring a perimeter", explanation: "Incorrect. Data Access logs improve audit visibility but do not simulate or enforce VPC Service Controls boundaries." },
+        { text: "Place the projects in separate folders and assume folder boundaries block data movement", explanation: "Incorrect. Resource hierarchy folders organize governance but do not by themselves create managed-service data perimeters." }
+      ],
+      correct: 1,
+      tags: ["security-compliance", "data-exfiltration", "governance", "advanced"],
+      source: S.VPC_SC_DRY_RUN
     }
   ];
 })();

@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const ACCESS_DATE = "accessed-2026-10-01";
+  const ACCESS_DATE = "accessed-2026-10-04";
   const GOOGLE_CLOUD_DOCS_LICENSE = "CC BY 4.0";
 
   function googleCloudSource(name, url) {
@@ -63,6 +63,25 @@
     CLOUD_SCHEDULER: googleCloudSource("Cloud Scheduler overview", "https://cloud.google.com/scheduler/docs/overview"),
     DISASTER_RECOVERY: googleCloudSource("disaster recovery planning guide", "https://cloud.google.com/architecture/dr-scenarios-planning-guide"),
     CLOUD_SQL_HA: googleCloudSource("Cloud SQL high availability", "https://cloud.google.com/sql/docs/mysql/high-availability"),
-    UPTIME_CHECKS: googleCloudSource("Cloud Monitoring uptime checks", "https://cloud.google.com/monitoring/uptime-checks")
+    UPTIME_CHECKS: googleCloudSource("Cloud Monitoring uptime checks", "https://cloud.google.com/monitoring/uptime-checks"),
+    BIGTABLE_SCHEMA: googleCloudSource("Bigtable schema design best practices", "https://cloud.google.com/bigtable/docs/schema-design"),
+    DATAFLOW_STREAMING: googleCloudSource("Dataflow streaming pipelines", "https://cloud.google.com/dataflow/docs/concepts/streaming-pipelines"),
+    ALLOYDB: googleCloudSource("AlloyDB overview", "https://cloud.google.com/alloydb/docs/overview"),
+    PRIVATE_SERVICE_CONNECT: googleCloudSource("Private Service Connect", "https://cloud.google.com/vpc/docs/private-service-connect"),
+    HA_VPN_INTERCONNECT: googleCloudSource("HA VPN over Cloud Interconnect", "https://cloud.google.com/network-connectivity/docs/interconnect/concepts/ha-vpn-interconnect"),
+    HIERARCHICAL_FIREWALL: googleCloudSource("hierarchical firewall policies", "https://cloud.google.com/firewall/docs/firewall-policies"),
+    PRIVATE_GOOGLE_ACCESS_HYBRID: googleCloudSource("Private Google Access for on-premises hosts", "https://cloud.google.com/vpc/docs/configure-private-google-access-hybrid"),
+    WORKFORCE_IDENTITY: googleCloudSource("Workforce Identity Federation", "https://cloud.google.com/iam/docs/workforce-identity-federation"),
+    WORKLOAD_IDENTITY_FEDERATION: googleCloudSource("Workload Identity Federation", "https://cloud.google.com/iam/docs/workload-identity-federation"),
+    KMS_SEPARATION_DUTIES: googleCloudSource("Cloud KMS separation of duties", "https://cloud.google.com/kms/docs/separation-of-duties"),
+    VPC_SC_DRY_RUN: googleCloudSource("VPC Service Controls dry run mode", "https://cloud.google.com/vpc-service-controls/docs/dry-run-mode"),
+    AGGREGATED_LOG_SINKS: googleCloudSource("aggregated log sinks", "https://cloud.google.com/logging/docs/export/aggregated_sinks"),
+    BIGQUERY_SLOTS: googleCloudSource("BigQuery slots", "https://cloud.google.com/bigquery/docs/slots"),
+    BIGQUERY_MATERIALIZED_VIEWS: googleCloudSource("BigQuery materialized views", "https://cloud.google.com/bigquery/docs/materialized-views-use"),
+    CLOUD_BUILD_PRIVATE_POOLS: googleCloudSource("Cloud Build private pools", "https://cloud.google.com/build/docs/private-pools/private-pools-overview"),
+    BINARY_AUTHORIZATION: googleCloudSource("Binary Authorization overview", "https://cloud.google.com/binary-authorization/docs/overview"),
+    STORAGE_AVAILABILITY: googleCloudSource("Cloud Storage availability and durability", "https://cloud.google.com/storage/docs/availability-durability"),
+    CLOUD_SQL_PITR: googleCloudSource("Cloud SQL point-in-time recovery", "https://cloud.google.com/sql/docs/postgres/backup-recovery/restore"),
+    PUBSUB_EXACTLY_ONCE: googleCloudSource("Pub/Sub exactly-once delivery", "https://cloud.google.com/pubsub/docs/exactly-once-delivery")
   });
 })();

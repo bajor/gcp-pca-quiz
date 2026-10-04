@@ -107,6 +107,45 @@
       correct: 3,
       tags: ["manage-provision", "storage", "compliance"],
       source: S.BUCKET_LOCK
+    },
+    {
+      id: "infrastructure-shared-vpc-subnet-delegation",
+      prompt: "An application team must create Compute Engine VMs in its service project and attach them only to one approved subnet in a Shared VPC host project. The team must not modify subnets, routes, or firewall rules. Which IAM design follows least privilege?",
+      answers: [
+        { text: "Grant Compute Network Admin on the host project and Viewer on the service project", explanation: "Incorrect. Network Admin permits changes to host-project networking, while Viewer does not let the team create its service-project VMs." },
+        { text: "Grant Owner on both the host and service projects", explanation: "Incorrect. Owner grants far more resource and IAM control than the team needs." },
+        { text: "Grant Compute Instance Admin on the service project and Compute Network User on only the approved host-project subnet", explanation: "Correct. Instance Admin permits VM management in the service project, while subnet-level Network User delegates use of only the approved Shared VPC subnet without network administration." },
+        { text: "Grant Compute Network User on the entire host project and no role on the service project", explanation: "Incorrect. Host-project Network User would expose all current and future subnets and would not grant permission to create VMs in the service project." }
+      ],
+      correct: 2,
+      tags: ["manage-provision", "networking", "iam", "advanced"],
+      source: S.SHARED_VPC
+    },
+    {
+      id: "infrastructure-hierarchical-firewall-delegation",
+      prompt: "Security administrators must enforce an organization-wide denial of direct internet SSH that project owners cannot override. For traffic not covered by central rules, project network teams should retain control of their VPC firewall rules. Which configuration meets both requirements?",
+      answers: [
+        { text: "Create an organization-level hierarchical firewall policy with the SSH deny rule and use goto-next rules where evaluation should pass to lower levels", explanation: "Correct. Hierarchical firewall policies are inherited from the organization or folders, so a central deny can take precedence while goto-next delegates unmatched decisions to lower policies and VPC rules." },
+        { text: "Ask each project owner to copy the same SSH deny VPC firewall rule", explanation: "Incorrect. Independently copied rules can drift and project owners with sufficient permissions can change or remove them." },
+        { text: "Use a Cloud Armor rule to deny TCP port 22 for every VPC", explanation: "Incorrect. Cloud Armor protects supported load-balanced application traffic and is not the control plane for general VPC SSH traffic." },
+        { text: "Use a resource-location Organization Policy constraint", explanation: "Incorrect. Resource-location constraints govern where supported resources can be created, not packet filtering or delegated firewall evaluation." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "networking", "governance", "advanced"],
+      source: S.HIERARCHICAL_FIREWALL
+    },
+    {
+      id: "infrastructure-private-google-access-on-premises",
+      prompt: "On-premises servers reach a VPC through Cloud Interconnect and have no internet route. They must call only Google APIs supported by VPC Service Controls, and API traffic must stay on Google's network. What should the network team configure?",
+      answers: [
+        { text: "Resolve all Google APIs to their normal public addresses and advertise a default internet route", explanation: "Incorrect. This depends on public API addresses and an internet route, contrary to the private connectivity requirement." },
+        { text: "Configure Private Google Access for on-premises hosts with restricted.googleapis.com DNS and advertise its VIP range through Cloud Router", explanation: "Correct. The restricted VIP exposes only VPC Service Controls-supported APIs, and the DNS and custom route advertisement direct on-premises API traffic over the hybrid connection to Google's network." },
+        { text: "Configure private.googleapis.com because it blocks every API not supported by VPC Service Controls", explanation: "Incorrect. private.googleapis.com exposes a broader set of Google APIs; restricted.googleapis.com is the option that limits access to supported services." },
+        { text: "Create a Cloud NAT gateway and use its external addresses as inbound API proxies", explanation: "Incorrect. Cloud NAT supports outbound connections for eligible VPC resources and does not act as an inbound proxy for on-premises hosts." }
+      ],
+      correct: 1,
+      tags: ["manage-provision", "hybrid-networking", "private-access", "advanced"],
+      source: S.PRIVATE_GOOGLE_ACCESS_HYBRID
     }
   ];
 })();

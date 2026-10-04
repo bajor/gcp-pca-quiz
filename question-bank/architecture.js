@@ -159,6 +159,71 @@
       correct: 1,
       tags: ["design-and-plan", "networking", "reliability"],
       source: S.LOAD_BALANCING
+    },
+    {
+      id: "architecture-bigtable-time-series-row-key",
+      prompt: "An IoT platform writes millions of readings per second to Bigtable. Its current row keys begin with an event timestamp, causing sequential writes to concentrate on one tablet. The dominant query retrieves a time range for one device. Which row-key design best addresses both requirements?",
+      answers: [
+        { text: "Use a high-cardinality device ID followed by the event timestamp", explanation: "Correct. A high-cardinality device prefix distributes writes, while the timestamp suffix keeps each device's readings in a row range that can be queried efficiently." },
+        { text: "Use timestamp followed by device ID", explanation: "Incorrect. A timestamp prefix keeps sequential writes adjacent and continues to create a hotspot." },
+        { text: "Hash the complete row key and discard the original device and time components", explanation: "Incorrect. A full hash can distribute writes, but it destroys the contiguous row ranges needed for efficient per-device time-range reads." },
+        { text: "Store every reading for a device as a new cell in one permanent row", explanation: "Incorrect. Repeatedly updating one row creates a hot row and risks unbounded row growth." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "databases", "bigtable", "advanced"],
+      source: S.BIGTABLE_SCHEMA
+    },
+    {
+      id: "architecture-dataflow-event-time-windows",
+      prompt: "A retailer publishes click events to Pub/Sub. It needs continuously updated five-minute event-time aggregates, must revise results when late events arrive, and does not want to manage a processing cluster. Which design best fits?",
+      answers: [
+        { text: "Run a nightly Dataproc batch job over exported messages", explanation: "Incorrect. A nightly batch does not provide continuously updated event-time results." },
+        { text: "Have a Cloud Run push endpoint increment one global counter", explanation: "Incorrect. A global counter does not implement event-time windows, late-data handling, or distributed state management." },
+        { text: "Use a Dataflow streaming pipeline with event-time windows, watermarks, and triggers", explanation: "Correct. Dataflow supports managed streaming execution and Apache Beam semantics for event-time windows, watermarks, triggers, and late data." },
+        { text: "Run a BigQuery scheduled query every five minutes over the Pub/Sub topic", explanation: "Incorrect. Scheduled queries operate on data stored in BigQuery and do not directly provide the required streaming window and late-data semantics over a topic." }
+      ],
+      correct: 2,
+      tags: ["design-and-plan", "analytics", "streaming", "advanced"],
+      source: S.DATAFLOW_STREAMING
+    },
+    {
+      id: "architecture-alloydb-read-pool",
+      prompt: "A PostgreSQL-compatible application has a write-heavy transactional primary and a rapidly growing read workload. It requires automatic failover for the primary and one read endpoint that load-balances across multiple read nodes without application-level sharding. Which architecture best fits?",
+      answers: [
+        { text: "A basic single-zone AlloyDB primary with no read pool", explanation: "Incorrect. A basic primary has no standby and does not provide horizontal read scaling." },
+        { text: "An AlloyDB highly available primary plus a multi-node read pool", explanation: "Correct. The highly available primary uses redundant nodes across zones, while an AlloyDB read pool provides a load-balanced read-only endpoint across its nodes." },
+        { text: "A single Cloud SQL instance with a larger disk", explanation: "Incorrect. Increasing disk size does not create a load-balanced set of read nodes or add the requested read scale." },
+        { text: "A Spanner database with no application or schema changes", explanation: "Incorrect. Spanner is not a drop-in PostgreSQL deployment and would require compatibility and migration work not allowed by the scenario." }
+      ],
+      correct: 1,
+      tags: ["design-and-plan", "databases", "alloydb", "advanced"],
+      source: S.ALLOYDB
+    },
+    {
+      id: "architecture-private-service-connect-published-api",
+      prompt: "A platform team operates an internal API in a producer VPC. Many independently managed consumer VPCs, some with overlapping address ranges, need private access through endpoints in their own networks. The producer must approve consumers without creating a peering mesh. Which design should be used?",
+      answers: [
+        { text: "Peer every consumer VPC directly with the producer VPC", explanation: "Incorrect. VPC Network Peering creates broad network connectivity, does not solve overlapping address ranges, and produces the peering mesh the team wants to avoid." },
+        { text: "Move every consumer workload into the producer's Shared VPC", explanation: "Incorrect. Shared VPC would require centralizing the consumer projects on one network and does not preserve the independently managed consumer VPC model." },
+        { text: "Expose the API through a public load balancer and restrict it by source IP", explanation: "Incorrect. This creates a public endpoint and relies on source-IP controls instead of the required private consumer endpoints." },
+        { text: "Publish the API with Private Service Connect and let consumers create approved endpoints", explanation: "Correct. Private Service Connect published services expose a producer service through private endpoints in consumer VPCs without peering the networks, and the producer can control connection acceptance." }
+      ],
+      correct: 3,
+      tags: ["design-and-plan", "networking", "private-service-connect", "advanced"],
+      source: S.PRIVATE_SERVICE_CONNECT
+    },
+    {
+      id: "architecture-ha-vpn-over-interconnect-encryption",
+      prompt: "A company uses Dedicated Interconnect for sustained high-throughput hybrid traffic. A new policy requires IPsec encryption from the on-premises routers to the VPC while keeping traffic off the public internet. Which change satisfies the policy?",
+      answers: [
+        { text: "Keep the Dedicated Interconnect VLAN attachments unchanged because Interconnect encrypts all traffic with IPsec by default", explanation: "Incorrect. Cloud Interconnect traffic is not automatically protected by end-to-end IPsec." },
+        { text: "Replace Interconnect with HA VPN tunnels over the public internet", explanation: "Incorrect. HA VPN provides IPsec, but using it by itself sends the traffic over the public internet and discards the required Interconnect path." },
+        { text: "Deploy HA VPN over Cloud Interconnect using VLAN attachments configured for IPsec encryption", explanation: "Correct. HA VPN over Cloud Interconnect combines Interconnect capacity and private routing with IPsec tunnels between the peer network and the VPC." },
+        { text: "Enable MACsec only on the physical Interconnect circuit", explanation: "Incorrect. MACsec protects the link between adjacent routers, not the complete Layer 3 path from the on-premises network to VPC workloads required by the policy." }
+      ],
+      correct: 2,
+      tags: ["design-and-plan", "hybrid-networking", "encryption", "advanced"],
+      source: S.HA_VPN_INTERCONNECT
     }
   ];
 })();
