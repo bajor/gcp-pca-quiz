@@ -6,12 +6,12 @@
   globalThis.PCA_QUIZ_ARCHITECTURE_QUESTIONS = [
     {
       id: "architecture-cloud-run-stateless-api",
-      prompt: "A team has a stateless HTTPS API packaged as a container. Traffic is spiky, and the team does not need Kubernetes-specific controls. Which service is the best fit?",
+      prompt: "A team has a stateless HTTPS API packaged as a container. Traffic is spiky, requests complete within the platform timeout, and the team wants request-based autoscaling without managing nodes or Kubernetes. Which service is the best fit?",
       answers: [
         { text: "Cloud Run service", explanation: "Correct. Cloud Run services provide managed HTTPS endpoints for stateless containers and automatically scale with request demand." },
-        { text: "Cloud Run job", explanation: "Incorrect. A Cloud Run job runs work to completion; it is not the resource type for continuously serving an HTTPS API." },
-        { text: "Google Kubernetes Engine cluster", explanation: "Incorrect. GKE can run the API, but it adds Kubernetes cluster and workload management that the stated requirements do not need." },
-        { text: "Compute Engine virtual machine", explanation: "Incorrect. A VM can host an API, but the team would need to manage its operating system, scaling, and availability design." }
+        { text: "Cloud Run job invoked for each request", explanation: "Incorrect. A Cloud Run job runs work to completion and does not provide the continuously available request-serving endpoint required for the API." },
+        { text: "GKE Autopilot deployment behind an Ingress", explanation: "Incorrect. Autopilot reduces node administration and can run the API, but it still introduces Kubernetes resources and controls that the team does not need." },
+        { text: "A Compute Engine managed instance group behind an Application Load Balancer", explanation: "Incorrect. This can autoscale and serve HTTPS, but the team must manage VM images, startup, patching, and instance-group capacity rather than use the requested serverless container model." }
       ],
       correct: 0,
       tags: ["design-and-plan", "compute"],
@@ -19,12 +19,12 @@
     },
     {
       id: "architecture-gke-kubernetes-controls",
-      prompt: "A platform needs Kubernetes APIs, custom controllers, DaemonSets, and control over pod scheduling. Which managed compute platform best fits these requirements?",
+      prompt: "A platform needs upstream Kubernetes APIs, custom controllers, DaemonSets, and direct control over node pools and pod scheduling. It wants Google to manage the control plane. Which compute platform best fits?",
       answers: [
-        { text: "Cloud Run", explanation: "Incorrect. Cloud Run runs containers without exposing Kubernetes primitives such as DaemonSets or custom controllers." },
-        { text: "Google Kubernetes Engine", explanation: "Correct. GKE is Google Cloud's managed Kubernetes service and supports Kubernetes workloads and APIs." },
-        { text: "App Engine standard environment", explanation: "Incorrect. App Engine abstracts the runtime platform and does not provide the required Kubernetes control plane or workload objects." },
-        { text: "Cloud Storage", explanation: "Incorrect. Cloud Storage is object storage, not a container orchestration platform." }
+        { text: "Cloud Run services with one service per Kubernetes workload", explanation: "Incorrect. Cloud Run abstracts Kubernetes and does not expose custom controllers, DaemonSets, node pools, or pod scheduling controls." },
+        { text: "GKE Standard", explanation: "Correct. GKE Standard provides a managed Kubernetes control plane while retaining control over node pools, scheduling, controllers, and Kubernetes workload objects." },
+        { text: "GKE Autopilot with no Standard node pools", explanation: "Incorrect. Autopilot provides Kubernetes APIs but Google manages node infrastructure and applies workload constraints, so it does not provide the requested direct node-pool control." },
+        { text: "Self-managed Kubernetes on individual Compute Engine VMs", explanation: "Incorrect. It provides Kubernetes control but requires the team to deploy and operate the control plane, contrary to the managed-control-plane requirement." }
       ],
       correct: 1,
       tags: ["design-and-plan", "containers"],
@@ -32,12 +32,12 @@
     },
     {
       id: "architecture-cloud-sql-relational",
-      prompt: "An existing application uses PostgreSQL and needs a managed relational database with backups, replication options, and database administration handled by Google Cloud. Which service should the architect choose?",
+      prompt: "An existing regional application uses standard PostgreSQL extensions and drivers. It needs managed backups, high availability, read replicas, and minimal migration changes, but not global horizontal write scaling. Which service should the architect choose?",
       answers: [
-        { text: "Cloud Storage", explanation: "Incorrect. Cloud Storage stores objects and does not provide a PostgreSQL-compatible relational database engine." },
-        { text: "BigQuery", explanation: "Incorrect. BigQuery is an analytical data platform, not the managed transactional PostgreSQL service described." },
+        { text: "AlloyDB for PostgreSQL", explanation: "Incorrect. AlloyDB is PostgreSQL-compatible and managed, but the scenario does not require its higher-performance architecture and emphasizes the simplest migration for a conventional regional PostgreSQL workload." },
+        { text: "Spanner with the PostgreSQL interface", explanation: "Incorrect. Spanner provides distributed scale and a PostgreSQL-compatible interface, not full PostgreSQL behavior and extension compatibility, so it is not the minimal-change fit." },
         { text: "Cloud SQL", explanation: "Correct. Cloud SQL is a fully managed relational database service that supports PostgreSQL, MySQL, and SQL Server." },
-        { text: "Memorystore", explanation: "Incorrect. Memorystore provides managed in-memory caching, not a PostgreSQL database." }
+        { text: "PostgreSQL on a Compute Engine regional managed instance group", explanation: "Incorrect. Self-managing PostgreSQL on interchangeable VMs adds database replication, failover, backup, and patching responsibilities that Cloud SQL provides as a managed service." }
       ],
       correct: 2,
       tags: ["design-and-plan", "databases"],
@@ -62,8 +62,8 @@
       answers: [
         { text: "Cloud SQL", explanation: "Incorrect. Cloud SQL is intended for relational application workloads, not serverless petabyte-scale analytical queries." },
         { text: "BigQuery", explanation: "Correct. BigQuery is a serverless analytics platform designed for large-scale SQL analysis." },
-        { text: "Filestore", explanation: "Incorrect. Filestore provides managed file storage, not an analytical SQL engine." },
-        { text: "Cloud VPN", explanation: "Incorrect. Cloud VPN provides network connectivity and does not store or query data." }
+        { text: "A persistent Managed Service for Apache Spark cluster", explanation: "Incorrect. Spark can analyze large datasets, but a persistent cluster requires provisioning and administration that the serverless ad hoc SQL requirement avoids." },
+        { text: "Spanner", explanation: "Incorrect. Spanner is a horizontally scalable transactional relational database, not the primary service for ad hoc petabyte-scale historical analytics." }
       ],
       correct: 1,
       tags: ["design-and-plan", "analytics"],
@@ -75,8 +75,8 @@
       answers: [
         { text: "Filestore", explanation: "Correct. Filestore provides managed Network File System (NFS) file shares for workloads that need shared file-system access." },
         { text: "Cloud Storage", explanation: "Incorrect. Cloud Storage is object storage and does not provide a native shared POSIX file system." },
-        { text: "BigQuery", explanation: "Incorrect. BigQuery is for analytical data processing, not mounted file shares." },
-        { text: "Persistent Disk attached to one VM", explanation: "Incorrect. A Persistent Disk is block storage and this answer does not satisfy concurrent shared file-system access across the VMs." }
+        { text: "A Persistent Disk in multi-writer mode mounted as a general-purpose NFS share", explanation: "Incorrect. Multi-writer block storage has filesystem and workload constraints and does not itself provide a managed NFS file service to the VMs." },
+        { text: "A Persistent Disk attached read-write to one VM and read-only to the others", explanation: "Incorrect. This does not provide concurrent shared read-write file semantics across the VMs and creates a file-server dependency on one VM." }
       ],
       correct: 0,
       tags: ["design-and-plan", "storage"],
@@ -86,10 +86,10 @@
       id: "architecture-cloud-storage-objects",
       prompt: "An application needs highly durable storage for images, backups, and static assets addressed as objects rather than rows or files. Which service is the best fit?",
       answers: [
-        { text: "Cloud SQL", explanation: "Incorrect. Cloud SQL stores relational data and is not the object storage service for backups and static assets." },
+        { text: "Persistent Disk", explanation: "Incorrect. Persistent Disk is block storage attached to Compute Engine VMs and is not a globally addressed object store for application assets and backups." },
         { text: "Filestore", explanation: "Incorrect. Filestore is a managed NFS file service, which is different from object storage." },
         { text: "Cloud Storage", explanation: "Correct. Cloud Storage is Google Cloud's object storage service for unstructured data such as images, backups, and static assets." },
-        { text: "Memorystore", explanation: "Incorrect. Memorystore is an in-memory cache, not durable object storage." }
+        { text: "Firestore", explanation: "Incorrect. Firestore stores structured documents and indexes rather than immutable or unstructured blobs addressed as objects." }
       ],
       correct: 2,
       tags: ["design-and-plan", "storage"],
@@ -99,10 +99,10 @@
       id: "architecture-pubsub-fanout",
       prompt: "When an order is placed, independent billing, notification, and analytics services must each receive an event without the order service calling them synchronously. Which service should decouple this fan-out?",
       answers: [
-        { text: "Cloud Scheduler", explanation: "Incorrect. Cloud Scheduler triggers jobs on a schedule; it is not a general event fan-out service." },
+        { text: "One Cloud Tasks queue shared by all three services", explanation: "Incorrect. A task is dispatched to an explicit handler and processed as one unit of work; one queue does not independently fan the same event out to three subscribers." },
         { text: "Pub/Sub", explanation: "Correct. Pub/Sub uses topics and subscriptions to decouple event publishers from multiple independent consumers." },
-        { text: "Cloud SQL", explanation: "Incorrect. A database table can record orders, but it does not provide the managed publish-subscribe fan-out pattern described." },
-        { text: "Cloud Load Balancing", explanation: "Incorrect. A load balancer distributes network traffic to backends and does not broadcast application events to consumers." }
+        { text: "A Workflows execution that calls billing, notification, and analytics in sequence", explanation: "Incorrect. This explicitly couples the order path to a fixed orchestration and does not give each consumer an independent event subscription." },
+        { text: "Eventarc with one trigger that selects one destination service", explanation: "Incorrect. Eventarc can route events to supported destinations, but a single trigger has one destination; separate consumers still need separate triggers or Pub/Sub subscriptions, and Pub/Sub directly fits this application fan-out." }
       ],
       correct: 1,
       tags: ["design-and-plan", "integration"],
@@ -112,9 +112,9 @@
       id: "architecture-shared-vpc-central-network",
       prompt: "Multiple application teams need separate projects, while a central network team must control subnets, routes, and firewall rules. Which network model best fits?",
       answers: [
-        { text: "A separate standalone VPC in every application project", explanation: "Incorrect. This gives each project a separate network and does not provide the requested centralized network administration model." },
-        { text: "Public IP addresses for all workloads", explanation: "Incorrect. Public addressing does not centralize network administration or provide private cross-project networking." },
-        { text: "Cloud CDN", explanation: "Incorrect. Cloud CDN caches content near users; it does not share centrally administered VPC resources across projects." },
+        { text: "A separate VPC in each project joined by VPC Network Peering", explanation: "Incorrect. A peering mesh preserves separate networks but distributes network ownership and route relationships rather than giving teams resources on centrally administered subnets." },
+        { text: "Private Service Connect endpoints from every project to a central producer VPC", explanation: "Incorrect. Private Service Connect exposes selected producer services privately; it does not let application VMs attach to centrally managed subnets or centralize their routes and firewall rules." },
+        { text: "A Network Connectivity Center hub with every project VPC as a spoke", explanation: "Incorrect. Network Connectivity Center centralizes connectivity and route exchange among separate VPCs, but each team still owns its VPC resources. It does not provide the host-project and service-project administration model requested." },
         { text: "Shared VPC", explanation: "Correct. Shared VPC uses a host project for centrally managed network resources and service projects for application resources." }
       ],
       correct: 3,
@@ -126,9 +126,9 @@
       prompt: "An on-premises data center must exchange a sustained high volume of traffic with Google Cloud over a low-latency private physical connection. The company can establish a direct connection at a colocation facility. Which option is the best fit?",
       answers: [
         { text: "Dedicated Interconnect", explanation: "Correct. Dedicated Interconnect provides a direct physical connection between an on-premises network and Google's network." },
-        { text: "Cloud VPN only", explanation: "Incorrect. Cloud VPN uses IPsec tunnels over the public internet rather than the requested direct physical connection." },
-        { text: "Cloud CDN", explanation: "Incorrect. Cloud CDN serves cacheable content to users and is not hybrid network connectivity." },
-        { text: "VPC Network Peering", explanation: "Incorrect. VPC Network Peering connects Google Cloud VPC networks; it does not establish an on-premises physical connection." }
+        { text: "Partner Interconnect", explanation: "Incorrect. Partner Interconnect provides connectivity through a supported service provider; the company can connect directly at a colocation facility and therefore fits Dedicated Interconnect." },
+        { text: "HA VPN with multiple high-availability tunnels", explanation: "Incorrect. HA VPN can provide encrypted hybrid connectivity but traverses the public internet and is not the requested direct physical connection for sustained high volume." },
+        { text: "Cross-Cloud Interconnect", explanation: "Incorrect. Cross-Cloud Interconnect is designed for dedicated connectivity between Google Cloud and another cloud provider, not the stated on-premises colocation connection." }
       ],
       correct: 0,
       tags: ["design-and-plan", "hybrid-networking"],
@@ -138,10 +138,10 @@
       id: "architecture-ha-vpn-encrypted-hybrid",
       prompt: "A company needs encrypted connectivity between its on-premises network and a VPC without ordering a physical cross-connect. Which service provides IPsec tunnels over the public internet?",
       answers: [
-        { text: "Cloud Interconnect without encryption", explanation: "Incorrect. Cloud Interconnect is private connectivity and does not provide the requested IPsec-over-internet solution by itself." },
-        { text: "Cloud DNS", explanation: "Incorrect. Cloud DNS resolves domain names and does not create encrypted network tunnels." },
+        { text: "Dedicated Interconnect with no additional encryption", explanation: "Incorrect. Dedicated Interconnect requires a physical connection and does not provide the requested IPsec tunnels over the public internet." },
+        { text: "Partner Interconnect through a service provider", explanation: "Incorrect. Partner Interconnect still requires ordering provider connectivity and is not the requested internet-based IPsec option." },
         { text: "HA VPN", explanation: "Correct. HA VPN establishes highly available IPsec VPN tunnels between a VPC and a peer network over the public internet." },
-        { text: "Cloud NAT", explanation: "Incorrect. Cloud NAT provides outbound translation for private resources; it does not connect an on-premises network to a VPC." }
+        { text: "Network Connectivity Center with router appliance spokes only", explanation: "Incorrect. Network Connectivity Center can orchestrate hybrid connectivity, but router appliances alone do not create the requested managed IPsec tunnels over the internet." }
       ],
       correct: 2,
       tags: ["design-and-plan", "hybrid-networking"],
@@ -151,10 +151,10 @@
       id: "architecture-global-external-application-lb",
       prompt: "A public HTTP application has healthy backends in multiple regions and needs one global frontend that routes requests to suitable healthy backends. Which component should be used?",
       answers: [
-        { text: "A regional internal load balancer", explanation: "Incorrect. An internal regional load balancer is not the requested global public HTTP frontend." },
+        { text: "A regional external Application Load Balancer in each backend region with DNS round robin", explanation: "Incorrect. This creates multiple regional frontends and DNS-based distribution rather than the requested single global anycast frontend with health-aware backend routing." },
         { text: "An external Application Load Balancer", explanation: "Correct. An external Application Load Balancer provides a global HTTP(S) frontend and can distribute traffic across regional backends." },
-        { text: "A Cloud Storage bucket", explanation: "Incorrect. Cloud Storage can host objects but does not route dynamic HTTP requests across application backends." },
-        { text: "A Cloud Router", explanation: "Incorrect. Cloud Router exchanges dynamic routes for hybrid networking and is not an HTTP application load balancer." }
+        { text: "A global external proxy Network Load Balancer", explanation: "Incorrect. A proxy Network Load Balancer can provide a global frontend for TCP traffic, but it does not provide the requested HTTP-aware Application Load Balancer behavior." },
+        { text: "Cloud CDN in front of one regional backend without a load balancer", explanation: "Incorrect. Cloud CDN accelerates cacheable content and uses a load-balancing origin; it does not by itself route all dynamic requests among healthy multi-region backends." }
       ],
       correct: 1,
       tags: ["design-and-plan", "networking", "reliability"],
@@ -224,6 +224,71 @@
       correct: 2,
       tags: ["design-and-plan", "hybrid-networking", "encryption", "advanced"],
       source: S.HA_VPN_INTERCONNECT
+    },
+    {
+      id: "architecture-cloud-tasks-controlled-dispatch",
+      prompt: "An order API must invoke one specific fulfillment endpoint for every accepted order. The endpoint can process at most 20 requests per second and 10 concurrently. Each invocation might be delayed until a requested time, must use bounded retries, and should reject duplicate task creation when the order ID is reused. Which design best fits?",
+      answers: [
+        { text: "Create a Cloud Tasks queue with dispatch and concurrency limits, use scheduled HTTP tasks named from order IDs, and make the handler idempotent", explanation: "Correct. Cloud Tasks provides explicit endpoint invocation, scheduling, queue-level dispatch controls, bounded retry configuration, and task-name deduplication. The handler should still be idempotent because delivery is at least once." },
+        { text: "Publish orders to one Pub/Sub push subscription and use ordering keys to enforce the endpoint's rate and deduplicate order IDs", explanation: "Incorrect. Pub/Sub is appropriate for decoupled event delivery, but ordering keys do not provide producer-controlled scheduling, task-name deduplication, or explicit queue dispatch and concurrency limits." },
+        { text: "Create one Cloud Scheduler job per order and retry each job until the endpoint acknowledges it", explanation: "Incorrect. Cloud Scheduler is intended for recurring or scheduled triggers, not a high-volume task queue with per-queue concurrency, retry, and deduplication controls." },
+        { text: "Start one Workflows execution per order and rely on the endpoint to return HTTP 429 when overloaded", explanation: "Incorrect. Workflows can orchestrate calls, but this design lacks the requested managed dispatch-rate and concurrency controls and shifts overload management to reactive failures." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "integration", "cloud-tasks", "advanced"],
+      source: S.CLOUD_TASKS_COMPARISON
+    },
+    {
+      id: "architecture-serverless-spark-batch",
+      prompt: "A company has an existing PySpark batch application whose input varies from gigabytes to terabytes. It runs a few times per week, needs standard Spark semantics, stores durable data outside the compute environment, and should not require a team to size or keep a cluster running. Which execution model best fits?",
+      answers: [
+        { text: "Keep a fixed Managed Service for Apache Spark cluster running between jobs to avoid startup time", explanation: "Incorrect. A persistent fixed cluster retains cluster sizing and idle-capacity management, contrary to the intermittent workload and no-cluster-operations requirement." },
+        { text: "Rewrite the application for Apache Beam and run it as a continuously active Dataflow streaming pipeline", explanation: "Incorrect. Dataflow is managed, but rewriting a finite PySpark batch workload as a continuous Beam pipeline is unnecessary and changes the programming model." },
+        { text: "Submit it as a Managed Service for Apache Spark serverless batch workload", explanation: "Correct. The serverless deployment runs PySpark on managed compute, autoscales workload resources, requires no cluster provisioning, and charges for the workload execution rather than idle cluster time." },
+        { text: "Install a Spark operator on a self-managed GKE Standard cluster and autoscale its node pools", explanation: "Incorrect. This preserves Spark but introduces Kubernetes, node-pool, and operator administration that the requirements explicitly avoid." }
+      ],
+      correct: 2,
+      tags: ["design-and-plan", "analytics", "spark", "advanced"],
+      source: S.SERVERLESS_SPARK
+    },
+    {
+      id: "architecture-gke-standard-privileged-agent",
+      prompt: "A platform must run a customer-developed node security agent as a privileged DaemonSet. The agent uses host namespaces, requires a custom node configuration, and is not covered by an approved Autopilot workload allowlist. The team accepts responsibility for node capacity and lifecycle. Which GKE design is appropriate?",
+      answers: [
+        { text: "An Autopilot cluster with ordinary workload settings", explanation: "Incorrect. Autopilot applies security constraints that reject most privileged workloads, and this custom agent has no applicable allowlist." },
+        { text: "A GKE Standard cluster with administrator-managed node pools", explanation: "Correct. Standard mode is intended for workloads that need special privileges and granular control over node infrastructure and configuration." },
+        { text: "A Standard cluster that schedules this agent onto an Autopilot ComputeClass", explanation: "Incorrect. Workloads selected for Autopilot mode in a Standard cluster remain subject to Autopilot constraints, so this does not satisfy the unallowlisted privileged-agent requirement." },
+        { text: "A Cloud Run worker pool with one container instance per VPC subnet", explanation: "Incorrect. Cloud Run does not expose Kubernetes DaemonSets, host namespaces, or controllable cluster nodes to the workload." }
+      ],
+      correct: 1,
+      tags: ["design-and-plan", "containers", "gke", "advanced"],
+      source: S.GKE_MODES
+    },
+    {
+      id: "architecture-spanner-default-leader-placement",
+      prompt: "A Spanner multi-region database has read-write regions in the United States and Europe. Most read-write transactions now originate in Europe, but the database's default leader remains in the United States and write latency has increased. The instance configuration and data placement must remain unchanged. What should the architect do?",
+      answers: [
+        { text: "Add another read-only replica in Europe and send all read-write transactions to it", explanation: "Incorrect. Read-only replicas can serve reads but do not process writes or become an eligible default leader." },
+        { text: "Move the database's default leader to the eligible European read-write region and keep write-heavy compute near it", explanation: "Correct. Writes are processed in the default leader region. Changing the leader to the European read-write region reduces the client-to-leader portion of write latency without moving data or changing the instance configuration." },
+        { text: "Use stale reads for every transaction so that the European replica can commit locally", explanation: "Incorrect. Staleness can improve read locality, but a read-write transaction must still commit through the leader and cannot use a read-only replica for local commits." },
+        { text: "Disable leader-aware routing so European clients always connect to a local Spanner frontend", explanation: "Incorrect. A local frontend does not move write leadership, and disabling leader-aware routing can add round trips for transactions originating outside the leader region." }
+      ],
+      correct: 1,
+      tags: ["design-and-plan", "databases", "spanner", "advanced"],
+      source: S.SPANNER_CONFIGURATIONS
+    },
+    {
+      id: "architecture-apigee-partner-api-program",
+      prompt: "A company is exposing APIs from several unchanged backend systems to hundreds of partners. It needs a stable proxy facade, OAuth and API-key policies, partner-specific products and quotas, self-service developer onboarding, and usage analytics. Which platform should front the backends?",
+      answers: [
+        { text: "Apigee API Management with API proxies, products, policies, a developer portal, and analytics", explanation: "Correct. Apigee provides an API proxy layer plus security and traffic policies, API products and quotas, developer publishing capabilities, and detailed API analytics without requiring those controls in each backend." },
+        { text: "API Gateway with one OpenAPI configuration and Cloud Logging", explanation: "Incorrect. API Gateway can secure and expose APIs, but it is not the full partner API program platform described, including API products, partner-specific monetization-style quotas, an integrated developer portal, and deep consumer analytics." },
+        { text: "An external Application Load Balancer with Cloud Armor rate-limiting rules", explanation: "Incorrect. Load balancing and edge security do not provide API products, OAuth token policies, developer onboarding, or consumer-level API analytics." },
+        { text: "API hub as the runtime proxy and enforcement point for all partner requests", explanation: "Incorrect. API hub catalogs and governs API metadata across an API landscape; it is not the runtime proxy layer that enforces request security and quotas." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "integration", "api-management", "advanced"],
+      source: S.APIGEE
     }
   ];
 })();

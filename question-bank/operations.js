@@ -6,12 +6,12 @@
   globalThis.PCA_QUIZ_OPERATIONS_QUESTIONS = [
     {
       id: "operations-budget-alert-not-cap",
-      prompt: "A project owner creates an alerts-only Cloud Billing budget at $5,000. What happens when actual spending reaches the configured threshold?",
+      prompt: "A project owner creates a standard alerts-only Cloud Billing budget at $5,000, configures an actual-spend threshold, and does not connect Pub/Sub notifications to any automation. What happens when spending reaches the threshold?",
       answers: [
-        { text: "Google Cloud automatically stops all billable services", explanation: "Incorrect. Alerts-only budgets do not automatically cap usage or prevent further charges." },
+        { text: "Billing is automatically disabled for the project until the next budget period", explanation: "Incorrect. A standard budget does not disable billing or stop resources unless the customer separately builds automation, which can itself have operational risks." },
         { text: "A notification is sent according to the configured budget thresholds", explanation: "Correct. Alerts-only budgets notify recipients when actual or forecasted spending reaches configured thresholds." },
-        { text: "All IAM permissions are revoked from project users", explanation: "Incorrect. Budget alerts do not change IAM policies or access permissions." },
-        { text: "Every VM is converted to a Spot VM", explanation: "Incorrect. A budget does not automatically alter VM purchasing options." }
+        { text: "New resource creation is rejected, but existing resources continue to accrue charges", explanation: "Incorrect. Budget thresholds do not become service quotas and do not reject resource-creation API calls." },
+        { text: "Charges above $5,000 are automatically credited because the budget is a hard spending cap", explanation: "Incorrect. Budgets provide monitoring and notifications, not a contractual cap or automatic credit for usage beyond the threshold." }
       ],
       correct: 1,
       tags: ["analyze-optimize", "cost-optimization"],
@@ -19,12 +19,12 @@
     },
     {
       id: "operations-committed-use-discount-baseline",
-      prompt: "A production service has a stable, well-understood baseline of Compute Engine usage that will run continuously for the next year. Which cost optimization should be evaluated?",
+      prompt: "A production service has a stable, well-understood baseline of eligible Compute Engine resource usage that will run continuously for the next year. Interruptions are not acceptable, and the team can commit to that baseline. Which cost optimization should it evaluate?",
       answers: [
         { text: "A committed use discount", explanation: "Correct. Committed use discounts are suited to predictable, sustained resource usage over a commitment term." },
-        { text: "Delete all monitoring data", explanation: "Incorrect. Removing monitoring data reduces observability and does not address the predictable compute baseline." },
-        { text: "Use only Spot VMs", explanation: "Incorrect. Spot VMs can be preempted, so they are not automatically suitable for a continuously required production baseline." },
-        { text: "Move the service to a Cloud Storage bucket", explanation: "Incorrect. Cloud Storage cannot run a Compute Engine workload." }
+        { text: "Spot VMs for the complete baseline", explanation: "Incorrect. Spot VMs reduce price but can be preempted and therefore conflict with the non-interruptible baseline requirement." },
+        { text: "Capacity reservations without a commitment", explanation: "Incorrect. Reservations can assure capacity but do not by themselves provide the term-based usage discount requested for the predictable baseline." },
+        { text: "On-demand VMs only, because automatic sustained use discounts always exceed commitment savings", explanation: "Incorrect. Sustained use discounts can apply automatically to eligible usage, but they do not categorically exceed a suitable one-year commitment for a known baseline." }
       ],
       correct: 0,
       tags: ["analyze-optimize", "cost-optimization", "compute"],
@@ -35,9 +35,9 @@
       prompt: "An organization wants managed recommendations for idle resources and opportunities to improve cloud resource utilization. Which Google Cloud service should it review?",
       answers: [
         { text: "Cloud Recommender", explanation: "Correct. Recommender analyzes resource usage and configuration to provide recommendations and insights, including cost and utilization opportunities." },
-        { text: "Cloud DNS", explanation: "Incorrect. Cloud DNS manages DNS zones and records; it does not analyze resource utilization." },
-        { text: "Cloud Scheduler", explanation: "Incorrect. Cloud Scheduler triggers jobs on a schedule and does not generate optimization recommendations." },
-        { text: "Cloud Shell", explanation: "Incorrect. Cloud Shell is an interactive development environment, not a recommendation engine." }
+        { text: "Cloud Asset Inventory feeds", explanation: "Incorrect. Asset Inventory records resource metadata and changes, but it does not by itself analyze utilization and issue managed optimization recommendations." },
+        { text: "Cloud Billing detailed export", explanation: "Incorrect. Billing export supplies granular cost data for custom analysis but does not itself produce the managed idle-resource and utilization recommendations." },
+        { text: "Cloud Monitoring dashboards", explanation: "Incorrect. Monitoring can visualize utilization metrics, but the team would need to define its own analysis rather than receive the requested managed recommendations." }
       ],
       correct: 0,
       tags: ["analyze-optimize", "cost-optimization"],
@@ -47,10 +47,10 @@
       id: "operations-bigquery-partition-cost-control",
       prompt: "A large BigQuery table is queried repeatedly by date, but analysts accidentally scan years of data for daily reports. What design most directly reduces unnecessary bytes scanned?",
       answers: [
-        { text: "Store the table in Cloud SQL", explanation: "Incorrect. Moving analytical data to Cloud SQL does not provide BigQuery's large-scale analytical design or enforce date pruning." },
+        { text: "Cluster the unpartitioned table by a high-cardinality customer ID", explanation: "Incorrect. Clustering can prune blocks for customer filters, but it does not directly enforce pruning by the report date and still permits full-history scans." },
         { text: "Partition the table by date and require a partition filter", explanation: "Correct. Partitioning and requiring a partition filter help queries scan only relevant partitions instead of the whole table." },
-        { text: "Add more BigQuery users", explanation: "Incorrect. Adding users does not reduce the amount of data a query scans." },
-        { text: "Turn off query job history", explanation: "Incorrect. Job history visibility does not change query bytes processed or cost." }
+        { text: "Create a logical view that selects every column from the table", explanation: "Incorrect. A logical view does not materialize or prune data by itself, so queries can still scan all dates when no partition filter is enforced." },
+        { text: "Purchase more slot capacity while leaving the table unpartitioned", explanation: "Incorrect. More capacity can improve throughput under capacity pricing but does not reduce the bytes read by poorly bounded daily queries." }
       ],
       correct: 1,
       tags: ["analyze-optimize", "analytics", "cost-optimization"],
@@ -61,9 +61,9 @@
       prompt: "Finance needs to analyze detailed cloud costs by SKU, project, and resource labels with custom SQL. Which capability should be configured?",
       answers: [
         { text: "Export Cloud Billing data to BigQuery", explanation: "Correct. Cloud Billing can export detailed usage and cost data to BigQuery for custom analysis and reporting." },
-        { text: "Create a Cloud Storage retention policy", explanation: "Incorrect. A retention policy controls object deletion and does not produce detailed billing analysis tables." },
-        { text: "Use a Cloud Armor policy", explanation: "Incorrect. Cloud Armor protects applications from attacks and does not export billing records." },
-        { text: "Enable Cloud CDN", explanation: "Incorrect. Cloud CDN caches content and does not provide a SQL dataset of billing records." }
+        { text: "Use the Cloud Billing Reports page and export screenshots for downstream processing", explanation: "Incorrect. Built-in reports support interactive analysis but do not provide the queryable, detailed tables required for arbitrary SQL by SKU, project, and labels." },
+        { text: "Publish budget notifications to Pub/Sub and treat each alert as a cost line item", explanation: "Incorrect. Budget events report threshold status rather than the detailed usage and cost records needed for financial analysis." },
+        { text: "Query Cloud Asset Inventory history and infer cost from resource creation times", explanation: "Incorrect. Asset history describes resources and policies, not authoritative SKU-level usage prices, credits, and charges." }
       ],
       correct: 0,
       tags: ["analyze-optimize", "billing"],
@@ -74,9 +74,9 @@
       prompt: "A platform team needs to attribute cloud usage to products, environments, and cost centers consistently across resources. What should it standardize and enforce?",
       answers: [
         { text: "Resource labels", explanation: "Correct. Labels are key-value metadata that help organize, filter, and analyze resources, including for cost allocation." },
-        { text: "Public IP addresses", explanation: "Incorrect. IP addresses identify network endpoints and do not provide structured business ownership metadata." },
-        { text: "Cloud Storage object versioning", explanation: "Incorrect. Versioning preserves object generations and does not identify cost centers for general cloud resources." },
-        { text: "A shared Owner role", explanation: "Incorrect. Broad IAM access does not add allocation metadata and weakens governance." }
+        { text: "A naming convention encoded only in resource display names", explanation: "Incorrect. Names are not a consistent key-value cost-allocation field across services and are harder to validate and aggregate than labels." },
+        { text: "One folder per cost center without resource metadata", explanation: "Incorrect. Folders help organize hierarchy and policy, but product and environment dimensions can cross folders and need explicit metadata on billable resources." },
+        { text: "Separate billing accounts for every product and environment combination", explanation: "Incorrect. Proliferating billing accounts is unnecessary for multidimensional attribution and does not label individual resources with all requested dimensions." }
       ],
       correct: 0,
       tags: ["analyze-optimize", "governance", "billing"],
@@ -88,8 +88,8 @@
       answers: [
         { text: "Standard Tier", explanation: "Incorrect. Standard Tier uses regional Google Cloud infrastructure and the public internet for parts of the path." },
         { text: "Premium Tier", explanation: "Correct. Premium Tier uses Google's global network to carry internet traffic closer to the user and destination." },
-        { text: "Cloud Storage Archive class", explanation: "Incorrect. Archive is a storage class and does not determine the network path for application traffic." },
-        { text: "Cloud VPN", explanation: "Incorrect. Cloud VPN creates encrypted hybrid tunnels and is not a Network Service Tier selection." }
+        { text: "Standard Tier with Cloud CDN disabled", explanation: "Incorrect. Disabling caching does not change Standard Tier's use of regional infrastructure and the public internet for the requested path." },
+        { text: "Premium Tier only for backend VM egress while the load balancer frontend remains Standard Tier", explanation: "Incorrect. The frontend tier determines how internet client traffic enters Google's network; a Standard Tier frontend would not provide the requested global Premium Tier path." }
       ],
       correct: 1,
       tags: ["analyze-optimize", "networking", "performance"],
@@ -113,9 +113,9 @@
       prompt: "A team wants alerts based on whether users receive successful responses within an agreed latency target, rather than alerts based only on VM CPU. What should it define and monitor?",
       answers: [
         { text: "A service-level indicator and service-level objective", explanation: "Correct. An SLI measures service performance, and an SLO sets the desired target for user-relevant measures such as availability or latency." },
-        { text: "Only a billing budget", explanation: "Incorrect. A budget tracks spending and does not define the quality of service received by users." },
-        { text: "Only a Cloud Storage lifecycle rule", explanation: "Incorrect. A lifecycle rule manages object storage and does not express a user-facing availability or latency target." },
-        { text: "A static external IP address", explanation: "Incorrect. An IP address is a networking resource and does not measure service performance." }
+        { text: "An uptime check alone with no target objective", explanation: "Incorrect. An uptime check can contribute a signal, but without an SLI definition and target it does not express the agreed success-and-latency objective." },
+        { text: "CPU and memory thresholds on every VM", explanation: "Incorrect. Resource saturation can aid diagnosis but does not directly measure whether users receive successful responses within the target latency." },
+        { text: "A provider service-level agreement used directly as the application's measured indicator", explanation: "Incorrect. A provider SLA is a contractual commitment for a service; the team still needs application-specific measured indicators and objectives for the user experience." }
       ],
       correct: 0,
       tags: ["analyze-optimize", "observability", "reliability"],
@@ -159,6 +159,45 @@
       correct: 2,
       tags: ["analyze-optimize", "analytics", "cost-optimization", "advanced"],
       source: S.BIGQUERY_MATERIALIZED_VIEWS
+    },
+    {
+      id: "operations-slo-fast-slow-burn-alerts",
+      prompt: "A service has a 30-day availability SLO. The on-call team must page for severe incidents that would exhaust the error budget quickly, but it also needs a lower-urgency signal for small failures that persist long enough to threaten the same SLO. Which alerting design best meets both goals?",
+      answers: [
+        { text: "Create separate SLO burn-rate alerts: a high threshold with a short lookback for fast burn and a lower threshold with a longer lookback for slow burn", explanation: "Correct. Burn rate normalizes current failures against the SLO's sustainable failure rate. Separate fast- and slow-burn policies detect both sharp incidents and persistent degradation while tying both signals to error-budget risk." },
+        { text: "Page whenever one request fails, then suppress all further alerts until the 30-day period ends", explanation: "Incorrect. A single failure is usually too sensitive, and suppressing later alerts hides whether the error budget is being consumed at a dangerous rate." },
+        { text: "Alert only when the complete 30-day error budget reaches zero", explanation: "Incorrect. Waiting for exhaustion provides no warning early enough to correct either a fast or slow burn before the SLO is violated." },
+        { text: "Use one VM CPU threshold for paging and one memory threshold for tickets", explanation: "Incorrect. Resource utilization can be useful diagnostic telemetry, but it does not directly measure user-facing SLO failure or error-budget consumption." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "observability", "sre", "advanced"],
+      source: S.SLO_BURN_RATE
+    },
+    {
+      id: "operations-log-exclusion-metric-alerting",
+      prompt: "A project receives a high volume of application logs. The team wants to exclude matching low-value entries from the project's _Default log bucket to reduce storage cost, while a counter and alert must continue tracking a specific pattern in those entries from the time the control is introduced. Which design is appropriate?",
+      answers: [
+        { text: "Create a project-scoped user-defined log-based counter metric for the pattern, then add the sink exclusion and alert on the metric", explanation: "Correct. Project-scoped user-defined log-based metrics are calculated from logs received by the Logging API, including entries excluded from storage. The metric only begins counting entries received after it is created." },
+        { text: "Add the exclusion first, then create a bucket-scoped log-based metric on the _Default bucket and expect historical backfill", explanation: "Incorrect. A bucket-scoped metric evaluates logs routed to that bucket, so excluded entries are unavailable to it, and log-based metrics are not retroactively populated." },
+        { text: "Use a system-defined log-based metric because system metrics count all excluded user application logs", explanation: "Incorrect. System-defined metrics cover predefined events and are calculated from included logs; they cannot be defined for an arbitrary application pattern in excluded entries." },
+        { text: "Export the excluded entries from the _Default bucket to BigQuery after the exclusion runs", explanation: "Incorrect. Entries excluded from the sink are not stored in that bucket and cannot later be exported from it. A separate included sink would be needed if the raw entries must be retained elsewhere." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "observability", "logging", "advanced"],
+      source: S.LOG_BASED_METRICS
+    },
+    {
+      id: "operations-bigquery-layered-query-cost-caps",
+      prompt: "A project uses BigQuery on-demand pricing. Finance requires a hard aggregate daily query-usage cap for the project, a uniform lower daily cap applied separately to each user or service account, and a safeguard that rejects any single scheduled query whose estimated bytes exceed its approved limit. Which controls should be combined?",
+      answers: [
+        { text: "Project and per-user daily custom query quotas, plus maximum bytes billed on each guarded query job", explanation: "Correct. On-demand custom quotas cap aggregate project usage and separately cap each principal's daily usage. Maximum bytes billed rejects an individual query before execution when its estimate exceeds the configured limit." },
+        { text: "A Cloud Billing budget, resource labels, and a partition expiration policy", explanation: "Incorrect. These can improve notification, allocation, and storage management, but they do not impose the requested proactive daily and per-query processing limits." },
+        { text: "One BigQuery reservation with baseline slots and an autoscaling maximum", explanation: "Incorrect. Reservations apply to capacity pricing and control slot capacity, while the scenario explicitly uses on-demand byte processing and requires byte-based daily and per-query caps." },
+        { text: "Maximum bytes billed on one representative query and a Dataform assertion for all other jobs", explanation: "Incorrect. A per-query setting does not impose project-wide or per-principal daily usage caps, and a Dataform assertion validates data rather than enforcing BigQuery query quotas." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "analytics", "cost-optimization", "advanced"],
+      source: S.BIGQUERY_COSTS
     }
   ];
 })();

@@ -82,6 +82,25 @@
     BINARY_AUTHORIZATION: googleCloudSource("Binary Authorization overview", "https://cloud.google.com/binary-authorization/docs/overview"),
     STORAGE_AVAILABILITY: googleCloudSource("Cloud Storage availability and durability", "https://cloud.google.com/storage/docs/availability-durability"),
     CLOUD_SQL_PITR: googleCloudSource("Cloud SQL point-in-time recovery", "https://cloud.google.com/sql/docs/postgres/backup-recovery/restore"),
-    PUBSUB_EXACTLY_ONCE: googleCloudSource("Pub/Sub exactly-once delivery", "https://cloud.google.com/pubsub/docs/exactly-once-delivery")
+    PUBSUB_EXACTLY_ONCE: googleCloudSource("Pub/Sub exactly-once delivery", "https://cloud.google.com/pubsub/docs/exactly-once-delivery"),
+    CLOUD_TASKS_COMPARISON: googleCloudSource("choosing Cloud Tasks or Pub/Sub", "https://cloud.google.com/tasks/docs/comp-pub-sub"),
+    SERVERLESS_SPARK: googleCloudSource("Managed Service for Apache Spark serverless overview", "https://cloud.google.com/dataproc-serverless/docs/overview"),
+    GKE_MODES: googleCloudSource("GKE modes of operation", "https://cloud.google.com/kubernetes-engine/docs/concepts/choose-cluster-mode"),
+    SPANNER_CONFIGURATIONS: googleCloudSource("Spanner instance configurations", "https://cloud.google.com/spanner/docs/instance-configurations"),
+    APIGEE: googleCloudSource("Apigee overview", "https://cloud.google.com/apigee/docs/api-platform/get-started/what-apigee"),
+    INFRASTRUCTURE_MANAGER: googleCloudSource("Infrastructure Manager overview", "https://cloud.google.com/infrastructure-manager/docs/overview"),
+    MIG_ROLLING_UPDATES: googleCloudSource("managed instance group rolling updates", "https://cloud.google.com/compute/docs/instance-groups/rolling-out-updates-to-managed-instance-groups"),
+    NETWORK_CONNECTIVITY_CENTER: googleCloudSource("Network Connectivity Center overview", "https://cloud.google.com/network-connectivity/docs/network-connectivity-center/concepts/overview"),
+    IAM_DENY: googleCloudSource("IAM deny policies", "https://cloud.google.com/iam/docs/deny-overview"),
+    ACCESS_TRANSPARENCY: googleCloudSource("Access Transparency overview", "https://cloud.google.com/assured-workloads/access-transparency/docs/overview"),
+    ACCESS_CONTEXT_MANAGER: googleCloudSource("Access Context Manager overview", "https://cloud.google.com/access-context-manager/docs/overview"),
+    CA_SERVICE_EXTERNAL_ROOT: googleCloudSource("CA Service subordinate CA from an external CA", "https://cloud.google.com/certificate-authority-service/docs/create-sub-ca-from-external-ca"),
+    SLO_BURN_RATE: googleCloudSource("SLO burn-rate alerting", "https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/alerting-on-budget-burn-rate"),
+    LOG_BASED_METRICS: googleCloudSource("log-based metrics", "https://cloud.google.com/logging/docs/logs-based-metrics"),
+    MIGRATE_VMS: googleCloudSource("Migrate to Virtual Machines lifecycle", "https://cloud.google.com/migrate/virtual-machines/docs/5.0/discover/lifecycle"),
+    CLOUD_DEPLOY_CANARY: googleCloudSource("Cloud Deploy canary deployments", "https://cloud.google.com/deploy/docs/deployment-strategies/canary"),
+    GKE_REGIONAL: googleCloudSource("GKE regional clusters", "https://cloud.google.com/kubernetes-engine/docs/concepts/regional-clusters"),
+    CLOUD_DNS_ROUTING: googleCloudSource("Cloud DNS routing policies and health checks", "https://cloud.google.com/dns/docs/routing-policies-overview"),
+    CLOUD_SQL_DR: googleCloudSource("Cloud SQL disaster recovery", "https://cloud.google.com/sql/docs/postgres/intro-to-cloud-sql-disaster-recovery")
   });
 })();

@@ -8,10 +8,10 @@
       id: "security-secret-manager-application-secret",
       prompt: "A service needs database credentials that can be rotated and accessed at runtime without placing them in source code or container images. Which service should store the credentials?",
       answers: [
-        { text: "Cloud Storage object metadata", explanation: "Incorrect. Object metadata is not a secret-management system and should not be used to store database credentials." },
+        { text: "A Cloud KMS-encrypted configuration file stored with the application", explanation: "Incorrect. This can encrypt the value, but the team must build secret versioning, distribution, access, and rotation workflows that Secret Manager provides directly." },
         { text: "Secret Manager", explanation: "Correct. Secret Manager stores, versions, and controls access to sensitive values such as database credentials." },
-        { text: "A Compute Engine instance label", explanation: "Incorrect. Labels are metadata for organizing resources and are not secure secret storage." },
-        { text: "A public environment variable in the deployment manifest", explanation: "Incorrect. A publicly visible deployment value exposes the credential rather than managing it securely." }
+        { text: "An environment variable containing the credential in the deployment manifest", explanation: "Incorrect. Environment injection can deliver a value at runtime, but placing the plaintext credential in the manifest exposes it and provides no managed rotation or version lifecycle." },
+        { text: "A private Cloud Storage object readable by the service account", explanation: "Incorrect. IAM can restrict the object, but Cloud Storage is not designed for secret version access, rotation workflows, and secret-specific audit operations." }
       ],
       correct: 1,
       tags: ["security-compliance", "secrets"],
@@ -19,12 +19,12 @@
     },
     {
       id: "security-cmek-key-lifecycle-control",
-      prompt: "A company must control the rotation, disabling, and destruction of encryption keys used by a supported Google Cloud service. What should the architect select?",
+      prompt: "A company must control the rotation schedule, IAM use, disabling, and destruction of encryption keys used by a supported Google Cloud service, while keeping service-side encryption integrated with that product. What should the architect select?",
       answers: [
         { text: "Customer-managed encryption keys with Cloud KMS", explanation: "Correct. Customer-managed encryption keys use Cloud KMS keys, letting the customer manage key lifecycle and IAM controls." },
-        { text: "Default Google-managed encryption only", explanation: "Incorrect. Google-managed encryption protects data, but it does not give the customer the requested key lifecycle control." },
-        { text: "A VPC firewall rule", explanation: "Incorrect. Firewall rules control network traffic, not cryptographic key lifecycle." },
-        { text: "Cloud CDN cache invalidation", explanation: "Incorrect. Cache invalidation controls cached content freshness and has no effect on encryption keys." }
+        { text: "Default Google-managed encryption keys with an Organization Policy rotation constraint", explanation: "Incorrect. Google manages the lifecycle of default encryption keys, and Organization Policy does not give the customer direct disable and destroy control over those keys." },
+        { text: "Customer-supplied encryption keys passed with each API request", explanation: "Incorrect. Customer-supplied keys require the application to supply and protect key material and do not provide the requested managed Cloud KMS rotation and lifecycle integration." },
+        { text: "Application-layer encryption using a key embedded in the service image", explanation: "Incorrect. Application encryption can add a layer of protection, but embedding a key is unsafe and does not integrate customer-controlled key lifecycle with the managed service." }
       ],
       correct: 0,
       tags: ["security-compliance", "encryption"],
@@ -34,10 +34,10 @@
       id: "security-vpc-service-controls-exfiltration",
       prompt: "A team stores regulated data in BigQuery and Cloud Storage. It needs a defense-in-depth control that limits copying this data to unauthorized resources outside a trusted perimeter, even if IAM is misconfigured. What should be added?",
       answers: [
-        { text: "A larger Cloud NAT gateway", explanation: "Incorrect. Cloud NAT provides outbound address translation and does not define data-service perimeters." },
+        { text: "IAM deny policies for known export permissions only", explanation: "Incorrect. IAM deny can block selected permissions, but it does not provide the context-aware managed-service perimeter that restricts data movement even when an allow policy is overly broad." },
         { text: "VPC Service Controls service perimeters", explanation: "Correct. VPC Service Controls adds context-based service perimeters that help mitigate data exfiltration from supported services such as BigQuery and Cloud Storage." },
-        { text: "A Cloud Storage lifecycle rule", explanation: "Incorrect. Lifecycle rules manage object age and storage class, not access across a service perimeter." },
-        { text: "A Cloud DNS private zone", explanation: "Incorrect. Private DNS resolution does not prevent copying data to unauthorized Google Cloud resources." }
+        { text: "Customer-managed encryption keys with separate keys for each project", explanation: "Incorrect. CMEK controls cryptographic key use and can support separation, but an authorized service call could still copy decrypted data outside the trusted resource set." },
+        { text: "Private Google Access with public IP addresses removed from workloads", explanation: "Incorrect. Private API connectivity changes the network path but does not define which Google Cloud resources may exchange protected service data." }
       ],
       correct: 1,
       tags: ["security-compliance", "data-exfiltration"],
@@ -48,9 +48,9 @@
       prompt: "A public web application behind an external Application Load Balancer needs web application firewall rules and Layer 7 DDoS protection. Which product should be used?",
       answers: [
         { text: "Cloud Armor", explanation: "Correct. Cloud Armor provides DDoS protection and web application firewall policies for protected applications." },
-        { text: "Cloud KMS", explanation: "Incorrect. Cloud KMS manages cryptographic keys and does not filter HTTP requests or mitigate web attacks." },
-        { text: "Cloud Scheduler", explanation: "Incorrect. Cloud Scheduler starts scheduled jobs and does not protect an internet-facing application." },
-        { text: "Cloud Filestore", explanation: "Incorrect. Filestore is managed file storage, not an edge security control." }
+        { text: "VPC firewall rules applied to the load balancer proxy-only subnet", explanation: "Incorrect. VPC firewalls control network-layer traffic to eligible interfaces and do not inspect HTTP requests for web attacks at the external Application Load Balancer edge." },
+        { text: "Cloud IDS with packet mirroring from every backend", explanation: "Incorrect. Cloud IDS provides network threat detection and findings, but it is not an inline edge web application firewall that blocks Layer 7 requests." },
+        { text: "reCAPTCHA Enterprise integrated only in the login form", explanation: "Incorrect. reCAPTCHA can help detect abusive user interactions, but it does not provide the general WAF policy and Layer 7 DDoS protection required for the whole application." }
       ],
       correct: 0,
       tags: ["security-compliance", "application-security"],
@@ -63,7 +63,7 @@
         { text: "Admin Activity audit logs only", explanation: "Incorrect. Admin Activity records configuration changes, not the requested detailed record of data reads and writes." },
         { text: "System Event audit logs only", explanation: "Incorrect. System Event logs record Google Cloud system actions and do not replace data access logging." },
         { text: "Data Access audit logs", explanation: "Correct. Data Access audit logs record API calls that read configuration or user-provided resource data, and they must be explicitly enabled for many services." },
-        { text: "A Cloud Billing budget alert", explanation: "Incorrect. Budget alerts report spending thresholds and do not capture resource access events." }
+        { text: "Access Transparency logs only", explanation: "Incorrect. Access Transparency records supported access by Google personnel, not ordinary reads by principals in the customer's organization." }
       ],
       correct: 2,
       tags: ["security-compliance", "audit"],
@@ -73,10 +73,10 @@
       id: "security-sensitive-data-protection",
       prompt: "Before sharing analytics data with a partner, an organization needs to discover personal data, classify it, and de-identify it. Which Google Cloud service is designed for this task?",
       answers: [
-        { text: "Cloud Trace", explanation: "Incorrect. Cloud Trace analyzes request latency and does not inspect or de-identify sensitive data." },
+        { text: "Dataplex Universal Catalog with automatic discovery only", explanation: "Incorrect. Cataloging can improve metadata discovery and governance, but it does not by itself provide the full inspection and transformation methods needed to de-identify sensitive values." },
         { text: "Sensitive Data Protection", explanation: "Correct. Sensitive Data Protection can discover, classify, inspect, and de-identify sensitive data in and outside Google Cloud." },
-        { text: "Cloud Load Balancing", explanation: "Incorrect. Load balancing distributes network traffic and does not classify data content." },
-        { text: "Cloud Router", explanation: "Incorrect. Cloud Router exchanges dynamic network routes and does not process sensitive data." }
+        { text: "BigQuery policy tags and column-level access control", explanation: "Incorrect. Policy tags restrict who can read classified columns, but they do not discover sensitive values or transform them for partner sharing." },
+        { text: "Cloud KMS envelope encryption", explanation: "Incorrect. Encryption protects data confidentiality at rest or in transit but does not inspect, classify, or de-identify the content before sharing." }
       ],
       correct: 1,
       tags: ["security-compliance", "data-protection"],
@@ -86,10 +86,10 @@
       id: "security-gke-workload-identity",
       prompt: "Pods on GKE must call Google Cloud APIs without downloading long-lived service account key files into containers. What is the recommended identity design?",
       answers: [
-        { text: "Store a JSON service account key in every container image", explanation: "Incorrect. Embedding long-lived keys in images exposes credentials and makes rotation difficult." },
-        { text: "Use each developer's user credentials in the pods", explanation: "Incorrect. Workloads should not depend on personal identities or credentials." },
+        { text: "Mount a service account JSON key from a Kubernetes Secret", explanation: "Incorrect. This avoids embedding the key in the image but still distributes a long-lived credential that must be rotated and can be exfiltrated." },
+        { text: "Grant the node service account every API role required by any pod on the node", explanation: "Incorrect. Node-wide credentials expand the blast radius and do not provide pod-level least-privilege identities." },
         { text: "Use Workload Identity Federation for GKE", explanation: "Correct. Workload Identity Federation for GKE lets Kubernetes workloads use IAM service account permissions without service account key files." },
-        { text: "Assign the GKE cluster a billing account", explanation: "Incorrect. A billing account is not a workload authentication mechanism." }
+        { text: "Run a custom metadata proxy that returns one shared service account token to all namespaces", explanation: "Incorrect. A shared token proxy weakens workload isolation and duplicates identity plumbing that Workload Identity Federation for GKE manages per workload." }
       ],
       correct: 2,
       tags: ["security-compliance", "iam", "gke"],
@@ -97,12 +97,12 @@
     },
     {
       id: "security-iap-internal-web-app",
-      prompt: "Employees need identity-based access to an internal web application without exposing it broadly to the internet or requiring a traditional VPN. Which service can enforce access before requests reach the application?",
+      prompt: "Employees need identity- and context-based access to an internal web application through an HTTPS load balancer. The team does not want to extend the corporate network with a traditional VPN, and authorization must occur before requests reach the application. Which service should enforce access?",
       answers: [
-        { text: "Cloud CDN", explanation: "Incorrect. Cloud CDN caches content but does not provide the requested identity-aware application access control." },
+        { text: "Cloud VPN with firewall rules for employee address ranges", explanation: "Incorrect. This extends network access and identifies source networks, not individual users and request context at the application edge." },
         { text: "Identity-Aware Proxy", explanation: "Correct. Identity-Aware Proxy uses identity and context to control access to applications before the request reaches the protected resource." },
-        { text: "Cloud Storage lifecycle management", explanation: "Incorrect. Lifecycle management changes object storage state and has no role in application authentication." },
-        { text: "Cloud Interconnect", explanation: "Incorrect. Cloud Interconnect provides private network connectivity but does not by itself enforce application-level identity access." }
+        { text: "An external Application Load Balancer with an allowlist of employee public IP addresses", explanation: "Incorrect. An IP allowlist does not authenticate employees or evaluate their user and device context, and roaming addresses make it brittle." },
+        { text: "VPC Service Controls around the application project", explanation: "Incorrect. VPC Service Controls protects supported Google-managed service APIs from data exfiltration; it is not the user authentication proxy for a custom web application." }
       ],
       correct: 1,
       tags: ["security-compliance", "identity"],
@@ -112,10 +112,10 @@
       id: "security-uniform-bucket-level-access",
       prompt: "A security policy requires all access to a Cloud Storage bucket to be controlled consistently with IAM and forbids object-level ACL exceptions. What should be enabled?",
       answers: [
-        { text: "Object versioning", explanation: "Incorrect. Object versioning retains noncurrent object versions; it does not disable ACL-based access control." },
-        { text: "Cloud Storage Autoclass", explanation: "Incorrect. Autoclass optimizes storage classes based on access patterns and does not change authorization semantics." },
+        { text: "IAM Conditions on the existing bucket role bindings", explanation: "Incorrect. Conditions can constrain IAM grants but do not disable legacy bucket and object ACLs that could provide separate access." },
+        { text: "Public access prevention", explanation: "Incorrect. Public access prevention blocks public principals but does not disable all object-level ACLs or require IAM-only authorization for named users." },
         { text: "Uniform bucket-level access", explanation: "Correct. Uniform bucket-level access disables ACLs and uses bucket-level IAM policies for all access decisions." },
-        { text: "A Cloud SQL read replica", explanation: "Incorrect. A Cloud SQL read replica is unrelated to Cloud Storage access management." }
+        { text: "Signed URLs for every object request", explanation: "Incorrect. Signed URLs delegate time-limited access but do not remove object ACL evaluation or establish IAM as the only bucket authorization system." }
       ],
       correct: 2,
       tags: ["security-compliance", "iam", "storage"],
@@ -172,6 +172,58 @@
       correct: 1,
       tags: ["security-compliance", "data-exfiltration", "governance", "advanced"],
       source: S.VPC_SC_DRY_RUN
+    },
+    {
+      id: "security-iam-deny-key-creation-guardrail",
+      prompt: "An organization prohibits user-managed service account key creation in every current and future project. Only a central emergency group may create keys. Project owners must not be able to bypass the guardrail by granting themselves another role. Assuming the relevant permissions are supported, which control should be used?",
+      answers: [
+        { text: "Attach an organization-level IAM deny policy for service account key-creation permissions to all principals, with the emergency group as an exception", explanation: "Correct. Deny policies are inherited and evaluated before allow policies, so conflicting role grants cannot bypass the denied permissions. Exception principals preserve the narrowly approved emergency path." },
+        { text: "Remove the Service Account Key Admin role from known users in each project once per quarter", explanation: "Incorrect. Other roles can contain the same permission, new projects and grants can appear between reviews, and project owners could restore access." },
+        { text: "Grant the emergency group Organization Administrator and rely on an organization-wide custom allow role for everyone else", explanation: "Incorrect. Allow roles grant permissions but do not create a non-bypassable prohibition against future conflicting grants, and Organization Administrator is unnecessarily broad." },
+        { text: "Use an IAM condition on every existing service account that expires non-emergency access", explanation: "Incorrect. Per-resource conditional allow bindings are difficult to apply to future resources and do not override another unconditional allow grant." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "iam", "governance", "advanced"],
+      source: S.IAM_DENY
+    },
+    {
+      id: "security-access-transparency-provider-access",
+      prompt: "A regulator requires an audit trail when Google personnel access supported customer data while resolving support cases or outages. The record must include the affected resource and action, access time, business justification or case reference, and information about the accessor. What should the organization enable?",
+      answers: [
+        { text: "Data Access audit logs, because they identify every action taken by both customer and Google personnel", explanation: "Incorrect. Cloud Audit Logs primarily record actions by principals in the customer's organization. They do not replace the provider-access record requested here." },
+        { text: "Access Transparency logs for the supported services", explanation: "Correct. Access Transparency records actions by Google personnel and includes the resource, action, time, reason, and accessor information needed for provider-access auditing." },
+        { text: "Access Approval without Access Transparency because approval requests contain a complete log of every completed action", explanation: "Incorrect. Access Approval controls whether certain access can proceed, while Access Transparency records the resulting Google personnel actions. Approval alone is not the requested action-level audit trail." },
+        { text: "VPC Flow Logs on every subnet containing a supported service", explanation: "Incorrect. VPC Flow Logs sample network flows for VPC interfaces and do not identify Google personnel actions or support-case justifications inside managed services." }
+      ],
+      correct: 1,
+      tags: ["security-compliance", "audit", "provider-access", "advanced"],
+      source: S.ACCESS_TRANSPARENCY
+    },
+    {
+      id: "security-access-context-perimeter-level",
+      prompt: "Analysts outside a VPC Service Controls perimeter may access protected BigQuery data only when requests come from approved corporate IP ranges and a fully managed, company-approved device. The context definition should be reusable across perimeter rules. Which design best fits?",
+      answers: [
+        { text: "Define an Access Context Manager access level with the required IP and device attributes, then reference that level in the perimeter policy", explanation: "Correct. Access Context Manager defines reusable attribute-based access levels, while VPC Service Controls references those levels and enforces access to protected services." },
+        { text: "Add the analysts to a BigQuery IAM group because IAM membership also validates network and device posture", explanation: "Incorrect. IAM grants resource permissions but group membership alone does not assert the request IP range and managed-device posture." },
+        { text: "Create a Cloud Armor policy for the BigQuery API and match device inventory labels", explanation: "Incorrect. Cloud Armor protects supported load-balanced application endpoints and is not the enforcement layer for BigQuery access inside a service perimeter." },
+        { text: "Define the attributes in Access Context Manager and assume it enforces them without any consuming service", explanation: "Incorrect. Access Context Manager defines context and access levels; an enforcement service such as VPC Service Controls must reference them to affect requests." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "context-aware-access", "vpc-service-controls", "advanced"],
+      source: S.ACCESS_CONTEXT_MANAGER
+    },
+    {
+      id: "security-ca-service-external-root",
+      prompt: "An enterprise's offline on-premises root certificate authority must remain the trust anchor, and its private key must never enter Google Cloud. Cloud workloads need scalable private certificate issuance without contacting the offline root for every certificate, and existing clients already trust that root. What should the security team deploy?",
+      answers: [
+        { text: "A new self-signed root CA in Certificate Authority Service and immediate replacement of every client's trust store", explanation: "Incorrect. This abandons the required existing trust anchor and creates a broad trust-store migration." },
+        { text: "The existing root private key imported into Cloud KMS so Certificate Authority Service can issue leaf certificates directly", explanation: "Incorrect. Importing or using the root key online violates the requirement that the root private key never enter Google Cloud and remain offline." },
+        { text: "A subordinate CA in Certificate Authority Service whose CSR is signed by the external offline root", explanation: "Correct. The external root remains offline and signs only the subordinate CA certificate. The managed subordinate can then issue workload certificates that chain to the root already trusted by clients." },
+        { text: "Publicly trusted certificates for every internal workload, issued directly by Certificate Manager", explanation: "Incorrect. Public certificates do not preserve the enterprise's private root as the required trust anchor and may not be suitable for private workload identities." }
+      ],
+      correct: 2,
+      tags: ["security-compliance", "pki", "certificates", "advanced"],
+      source: S.CA_SERVICE_EXTERNAL_ROOT
     }
   ];
 })();

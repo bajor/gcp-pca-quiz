@@ -9,9 +9,9 @@
       prompt: "An enterprise needs a governance policy to be inherited by every current and future project in the company. At which resource-hierarchy level should it be established?",
       answers: [
         { text: "Organization", explanation: "Correct. The organization is the top-level Google Cloud resource and policies applied there can be inherited by descendant folders and projects." },
-        { text: "Individual Compute Engine VM", explanation: "Incorrect. A VM is a workload resource and a policy there cannot govern other projects or resources across the company." },
-        { text: "Single project", explanation: "Incorrect. A project-level policy applies only in that project and will not automatically govern all other projects." },
-        { text: "Cloud Storage bucket", explanation: "Incorrect. A bucket is a storage resource and cannot be the hierarchy root for enterprise-wide governance." }
+        { text: "The folder that currently contains production projects", explanation: "Incorrect. A folder policy reaches only that folder's descendants and would miss projects in other current or future organization branches." },
+        { text: "Each project, automated from a central Terraform module", explanation: "Incorrect. Automation can reduce drift, but separate project policies do not provide one inherited control that automatically covers every hierarchy branch." },
+        { text: "The billing account linked to the projects", explanation: "Incorrect. Billing accounts govern payment relationships and are not ancestors of projects in the resource hierarchy for policy inheritance." }
       ],
       correct: 0,
       tags: ["manage-provision", "resource-hierarchy"],
@@ -19,12 +19,12 @@
     },
     {
       id: "infrastructure-iam-least-privilege",
-      prompt: "A developer needs to deploy Cloud Run revisions in one project but does not need access to billing, IAM, or other projects. What is the best IAM approach?",
+      prompt: "A developer needs to deploy Cloud Run revisions in one project and use one approved runtime service account, but must not change project IAM, billing, or unrelated services. What is the best IAM approach?",
       answers: [
-        { text: "Grant the Owner role on the organization", explanation: "Incorrect. Owner grants broad permissions across the organization and violates least privilege." },
-        { text: "Grant the smallest suitable predefined or custom role on that project", explanation: "Correct. IAM should grant only the permissions needed, at the narrowest appropriate resource scope." },
-        { text: "Share a Project Owner account among the developers", explanation: "Incorrect. Shared credentials reduce auditability and Owner is far broader than the required deployment permission." },
-        { text: "Make the developer a billing account administrator", explanation: "Incorrect. Billing administration does not supply the required Cloud Run deployment permissions and is unrelated to the task." }
+        { text: "Grant Cloud Run Admin on the organization so inherited access covers the target project", explanation: "Incorrect. Organization scope exposes every descendant project and Cloud Run Admin is broader than the one-project deployment need." },
+        { text: "Grant the smallest suitable deployment role in the target project and Service Account User only on the approved runtime service account", explanation: "Correct. Narrow resource scopes and only the permissions required for deployment and use of the runtime identity follow least privilege." },
+        { text: "Grant Project Editor in the target project and remove billing permissions with a deny rule", explanation: "Incorrect. Editor still grants broad modification rights across many project services, even if billing access is separately restricted." },
+        { text: "Create a shared deployer service account key and give the key to every developer", explanation: "Incorrect. A shared long-lived key weakens attribution and credential security rather than granting each developer narrowly scoped access." }
       ],
       correct: 1,
       tags: ["manage-provision", "iam"],
@@ -32,12 +32,12 @@
     },
     {
       id: "infrastructure-service-account-workload-identity",
-      prompt: "A Compute Engine workload must call Google Cloud APIs without using an employee's credentials. Which identity should the workload use?",
+      prompt: "A Compute Engine workload must call two Google Cloud APIs without using an employee identity or a downloaded long-lived key. Its permissions must be independently reviewable and limited to that workload. Which identity design should be used?",
       answers: [
-        { text: "A user-managed service account attached to the workload", explanation: "Correct. Service accounts represent non-human workloads and can receive only the IAM permissions the workload needs." },
-        { text: "The developer's personal user account", explanation: "Incorrect. A workload should not depend on a person's identity or retain that person's credentials." },
-        { text: "An API key stored in source control", explanation: "Incorrect. API keys do not replace IAM workload identity and storing credentials in source control is unsafe." },
-        { text: "The project's billing account", explanation: "Incorrect. A billing account is not an identity that can authenticate a workload to Google Cloud APIs." }
+        { text: "A user-managed service account attached to the VM with only the required IAM roles", explanation: "Correct. An attached service account gives the VM a non-human identity and short-lived credentials from the metadata server without distributing a key file." },
+        { text: "The Compute Engine default service account with the broad Editor role", explanation: "Incorrect. It avoids a user credential but does not provide the independent, workload-specific least-privilege identity requested." },
+        { text: "A user-managed service account key copied to the VM at startup", explanation: "Incorrect. The service account is an appropriate identity type, but downloading and distributing a long-lived key violates the credential requirement and adds rotation risk." },
+        { text: "Workload Identity Federation configured for an external identity provider", explanation: "Incorrect. Federation is useful for workloads outside Google Cloud; a Compute Engine VM can use an attached service account directly without an external provider." }
       ],
       correct: 0,
       tags: ["manage-provision", "iam"],
@@ -47,10 +47,10 @@
       id: "infrastructure-org-policy-allowed-locations",
       prompt: "A compliance requirement permits new Google Cloud resources only in approved regions. What is the most scalable preventive control?",
       answers: [
-        { text: "Ask every project owner to remember the approved regions", explanation: "Incorrect. Manual guidance is not an enforceable control and is likely to drift across projects." },
-        { text: "Create a spreadsheet of resources after they are deployed", explanation: "Incorrect. A spreadsheet detects issues after the fact and does not prevent noncompliant resource creation." },
+        { text: "Add an IAM condition to each resource-creator role that compares the requested region", explanation: "Incorrect. IAM Conditions do not provide one universal creation-time location guardrail across supported resource types and every role binding." },
+        { text: "Use Security Command Center findings to delete resources found outside approved regions", explanation: "Incorrect. Detection and remediation occur after creation, while the requirement asks for a scalable preventive control." },
         { text: "Use an Organization Policy location constraint", explanation: "Correct. Organization Policy can enforce allowed resource locations at the organization, folder, or project level." },
-        { text: "Use Cloud CDN", explanation: "Incorrect. Cloud CDN caches content near users and does not restrict where resources can be created." }
+        { text: "Require Terraform for deployments and reject unapproved regions in one repository's CI pipeline", explanation: "Incorrect. This helps governed pipelines but can be bypassed by other deployment paths unless an Organization Policy enforces the location at the resource API." }
       ],
       correct: 2,
       tags: ["manage-provision", "governance"],
@@ -60,10 +60,10 @@
       id: "infrastructure-mig-autoscaling",
       prompt: "A stateless web tier runs on identical Compute Engine VMs and must add or remove instances automatically as demand changes. Which design should be used?",
       answers: [
-        { text: "A single large VM resized manually", explanation: "Incorrect. Manual vertical scaling is not automatic horizontal scaling and leaves a single-instance dependency." },
+        { text: "An unmanaged instance group with a Cloud Scheduler job that creates VMs at predicted peak times", explanation: "Incorrect. Scheduled capacity is not demand-responsive autoscaling, and unmanaged groups do not maintain instances from a common template." },
         { text: "A managed instance group with autoscaling", explanation: "Correct. Managed instance groups maintain identical VMs and can automatically scale the group from configured signals." },
-        { text: "A Cloud Storage lifecycle rule", explanation: "Incorrect. Storage lifecycle rules manage object transitions and deletion, not compute instance count." },
-        { text: "A Cloud KMS key ring", explanation: "Incorrect. Cloud KMS manages cryptographic keys and has no role in VM autoscaling." }
+        { text: "A managed instance group with a fixed target size and autohealing only", explanation: "Incorrect. Autohealing replaces unhealthy instances but does not add or remove capacity as demand changes." },
+        { text: "Several standalone VMs behind a load balancer with utilization alerts", explanation: "Incorrect. Alerts and load balancing distribute and report traffic, but standalone VMs are not automatically added or removed without an autoscaled group." }
       ],
       correct: 1,
       tags: ["manage-provision", "compute"],
@@ -73,10 +73,10 @@
       id: "infrastructure-spot-vms-fault-tolerant",
       prompt: "A fault-tolerant batch job can restart from checkpoints and its primary goal is to minimize compute cost. Which Compute Engine purchasing option is most appropriate?",
       answers: [
-        { text: "Sole-tenant nodes", explanation: "Incorrect. Sole-tenant nodes address isolation requirements and are not the low-cost, interruptible option described." },
-        { text: "A committed use discount before estimating stable usage", explanation: "Incorrect. Commitments suit predictable baseline use; this question emphasizes a workload that can tolerate interruption." },
+        { text: "A capacity reservation for standard VMs", explanation: "Incorrect. A reservation improves capacity assurance but does not provide the discounted interruptible pricing that the checkpointed job can exploit." },
+        { text: "A one-year resource-based committed use discount", explanation: "Incorrect. A commitment can reduce predictable baseline cost but creates a term commitment; the workload's explicit interruption tolerance makes Spot capacity the better fit for minimizing compute price." },
         { text: "Spot VMs", explanation: "Correct. Spot VMs offer discounted capacity that can be preempted, so they are appropriate for fault-tolerant, interruptible workloads." },
-        { text: "A fixed regional managed instance group", explanation: "Incorrect. A managed instance group can improve availability, but it does not itself provide the discounted interruptible pricing model." }
+        { text: "Standard on-demand VMs that receive automatic sustained use discounts", explanation: "Incorrect. Sustained use discounts can reduce eligible on-demand cost without interruption, but a checkpointed workload that explicitly tolerates preemption can use the deeper Spot pricing model." }
       ],
       correct: 2,
       tags: ["manage-provision", "cost-optimization"],
@@ -87,9 +87,9 @@
       prompt: "A bucket receives daily exports that should become cheaper after 90 days and be deleted after seven years. Which Cloud Storage feature should automate this policy?",
       answers: [
         { text: "A Cloud Storage lifecycle configuration", explanation: "Correct. Lifecycle management can transition objects between storage classes and delete them when conditions such as object age are met." },
-        { text: "A Cloud Run minimum instance setting", explanation: "Incorrect. Cloud Run minimum instances control running container capacity, not object retention or storage class transitions." },
-        { text: "An IAM conditional role", explanation: "Incorrect. IAM conditions control access, not automated changes to object storage classes or deletion." },
-        { text: "A Cloud Load Balancing health check", explanation: "Incorrect. Health checks assess backend health and do not manage stored objects." }
+        { text: "Cloud Storage Autoclass plus a seven-year soft-delete duration", explanation: "Incorrect. Autoclass chooses storage classes from observed access patterns rather than the required fixed 90-day transition, and soft delete is a recovery window rather than a seven-year lifecycle deletion schedule." },
+        { text: "A seven-year retention policy with no lifecycle rules", explanation: "Incorrect. A retention policy prevents early deletion but does not transition objects after 90 days or automatically delete them when the retention period ends." },
+        { text: "A daily Storage Transfer Service job between Standard and Archive buckets", explanation: "Incorrect. Scheduled transfers add a second bucket and custom age-selection workflow when native lifecycle rules can perform both timed transitions and deletion in place." }
       ],
       correct: 0,
       tags: ["manage-provision", "storage", "cost-optimization"],
@@ -146,6 +146,45 @@
       correct: 1,
       tags: ["manage-provision", "hybrid-networking", "private-access", "advanced"],
       source: S.PRIVATE_GOOGLE_ACCESS_HYBRID
+    },
+    {
+      id: "infrastructure-manager-terraform-revisions",
+      prompt: "A platform team stores Terraform configurations in Git. It wants pull requests to show the planned resource changes, merged changes to run in a Google-managed execution environment, and each applied version to retain its configuration, logs, resource list, and state. Which approach best meets these requirements?",
+      answers: [
+        { text: "Use Infrastructure Manager deployments, previews, and revisions, integrated with Cloud Build repository triggers", explanation: "Correct. Infrastructure Manager runs Terraform through a managed toolchain, previews planned changes, and records deployment revisions with configuration, logs, resources, and state. Its Git automation uses Cloud Build triggers for previews and deployments." },
+        { text: "Run terraform apply from each engineer's workstation and store console output in Git", explanation: "Incorrect. Workstation execution does not provide a centrally managed runtime or authoritative managed deployment state and revisions." },
+        { text: "Use Deployment Manager previews and import the Terraform state into each deployment", explanation: "Incorrect. Deployment Manager uses its own configuration model and is not the managed Terraform revision workflow requested." },
+        { text: "Store Terraform files in Artifact Registry and let Config Sync apply them directly to projects", explanation: "Incorrect. Config Sync manages Kubernetes configuration from a source of truth; it does not execute general Terraform plans and maintain Infrastructure Manager deployment revisions." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "infrastructure-as-code", "terraform", "advanced"],
+      source: S.INFRASTRUCTURE_MANAGER
+    },
+    {
+      id: "infrastructure-mig-zero-unavailable-update",
+      prompt: "A stateless regional managed instance group has exactly enough healthy VMs to meet its service capacity target. A new instance template requires VM replacement. During the automatic rollout, no existing capacity may be unavailable before replacement VMs become healthy, and quota permits three temporary VMs. Which update policy is appropriate?",
+      answers: [
+        { text: "Set maxUnavailable to 3 and maxSurge to 0 so old VMs are replaced first", explanation: "Incorrect. This can remove up to three existing VMs before their replacements are available, violating the zero-capacity-loss requirement." },
+        { text: "Set both maxUnavailable and maxSurge to 0 and use a proactive update", explanation: "Incorrect. At least one of maxUnavailable or maxSurge must be greater than zero, otherwise the rollout cannot make progress." },
+        { text: "Set maxUnavailable to 0 and maxSurge to 3, with a health check and suitable minimum ready time", explanation: "Correct. The updater can create up to three replacement VMs above target size and waits for availability before removing old capacity. Health and readiness settings prevent merely running but unready replacements from being treated as available." },
+        { text: "Set maxUnavailable to 100% and rely on the regional distribution to preserve capacity", explanation: "Incorrect. Regional placement protects against zonal failure, but allowing all instances to be unavailable permits the updater to disrupt the entire serving fleet." }
+      ],
+      correct: 2,
+      tags: ["manage-provision", "compute", "rolling-update", "advanced"],
+      source: S.MIG_ROLLING_UPDATES
+    },
+    {
+      id: "infrastructure-ncc-vpc-hybrid-transit",
+      prompt: "An enterprise has many independently administered VPC networks and several on-premises sites connected by HA VPN and Cloud Interconnect. It needs centrally managed, scalable any-to-any route exchange among the VPCs and hybrid connections without building pairwise peering and VPN meshes. Which design should it use?",
+      answers: [
+        { text: "Attach VPC spokes and the appropriate hybrid spokes to a Network Connectivity Center hub and configure route exchange", explanation: "Correct. Network Connectivity Center provides centralized hub-and-spoke orchestration and supports any-to-any connectivity across VPC and hybrid spokes when route exchange is configured." },
+        { text: "Create a full mesh of VPC Network Peering links and rely on peering to transit on-premises routes", explanation: "Incorrect. Pairwise peering creates the operational mesh being avoided, and VPC Network Peering is not a general transitive-routing service." },
+        { text: "Move every project into one Shared VPC and terminate all hybrid links in service projects", explanation: "Incorrect. Shared VPC centralizes one VPC across service projects but does not preserve the requirement for many independently administered VPC networks or provide this multi-VPC hub route exchange model." },
+        { text: "Create one Cloud Router in each VPC and enable BGP sessions directly between Cloud Routers", explanation: "Incorrect. Cloud Routers exchange routes with supported peer routers over hybrid connectivity; they do not form direct BGP sessions with one another to create centralized inter-VPC transit." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "networking", "hybrid-networking", "advanced"],
+      source: S.NETWORK_CONNECTIVITY_CENTER
     }
   ];
 })();
