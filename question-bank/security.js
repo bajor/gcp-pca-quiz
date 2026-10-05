@@ -276,6 +276,58 @@
       correct: 3,
       tags: ["security-compliance", "database-security", "iam", "advanced"],
       source: S.CLOUD_SQL_IAM_AUTH
+    },
+    {
+      id: "security-bigquery-row-and-column-access",
+      prompt: "Analysts query one shared BigQuery table directly. Each analyst group may see rows for its assigned sales region, while only a compensation group may read the salary column. The team wants enforcement at the table rather than separate regional copies or query-specific filters. Which controls should it combine?",
+      answers: [
+        { text: "Create row access policies for the regional groups and apply a policy tag to the salary column with restricted access", explanation: "Correct. Row-level access policies filter rows for authorized principals, while policy tags enforce fine-grained access to sensitive columns on the shared table." },
+        { text: "Grant dataset Viewer to all analysts and ask each dashboard to add a regional WHERE clause", explanation: "Incorrect. Query-specific filters are not an access boundary; an analyst could submit a query that omits the filter and reads rows from other regions." },
+        { text: "Apply a policy tag to the salary column and rely on it to filter rows by region", explanation: "Incorrect. Policy tags control column-level access, but they do not filter table rows according to an analyst's region." },
+        { text: "Create one authorized view for each region and grant every analyst direct access to the base table", explanation: "Incorrect. Regional views can filter rows, but direct access to the base table bypasses those view filters, and the design does not enforce the salary restriction on that table." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "data-protection", "analytics", "advanced"],
+      source: S.BIGQUERY_ROW_SECURITY
+    },
+    {
+      id: "security-iam-policy-troubleshooter-denial",
+      prompt: "A service account has a role that appears to contain storage.objects.get, but an access attempt is denied. The administrator needs to determine whether an inherited deny policy, an allow-policy binding, or another applicable IAM policy explains the result for this principal, resource, and permission. Which tool should be used?",
+      answers: [
+        { text: "Policy Troubleshooter with the service account, object resource, and storage.objects.get permission", explanation: "Correct. Policy Troubleshooter evaluates the applicable allow, deny, and principal access boundary policies for a specific principal, resource, and permission and explains the result." },
+        { text: "Policy Analyzer to list principals that have access to the storage bucket", explanation: "Incorrect. Policy Analyzer is useful for answering who has access to a resource, but the immediate task is to explain one principal's result for one permission." },
+        { text: "IAM Recommender to remove the service account's unused roles", explanation: "Incorrect. Recommender identifies access optimization opportunities; it does not explain the policy evaluation behind this denied request." },
+        { text: "IAM Policy Simulator to test a proposed role change before applying it", explanation: "Incorrect. Policy Simulator evaluates the effect of proposed policy changes, while the administrator needs an explanation of the current access decision." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "iam", "troubleshooting", "advanced"],
+      source: S.IAM_POLICY_TROUBLESHOOTER
+    },
+    {
+      id: "security-kms-rotation-preserve-decryption",
+      prompt: "A service encrypts new records with a symmetric Cloud KMS key. Policy requires a new key version every 90 days, but existing ciphertext must remain decryptable without a bulk rewrite during each rotation. What should the team configure?",
+      answers: [
+        { text: "Set an automatic rotation schedule and keep prior key versions enabled for decryption until the data is re-encrypted or expires", explanation: "Correct. Rotation creates a new primary key version for new encryption operations, but it does not re-encrypt existing data. Older versions must remain available while ciphertext depends on them." },
+        { text: "Set an automatic rotation schedule and immediately disable every prior key version after each rotation", explanation: "Incorrect. Existing ciphertext encrypted with an older version might no longer be decryptable after that version is disabled." },
+        { text: "Create a new CryptoKey every 90 days and delete the prior key as soon as the replacement is primary", explanation: "Incorrect. Replacing the CryptoKey does not migrate existing ciphertext, and deleting the old key can make that data unrecoverable." },
+        { text: "Set a rotation schedule and assume Cloud KMS automatically re-encrypts all data protected by the key", explanation: "Incorrect. Cloud KMS rotates key versions but does not automatically rewrite application data encrypted under older versions." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "encryption", "key-management", "advanced"],
+      source: S.KMS_KEY_ROTATION
+    },
+    {
+      id: "security-cloud-armor-rate-ban-and-waf",
+      prompt: "An internet-facing API behind an external Application Load Balancer receives SQL injection probes and bursts of requests from individual client IPs. The security team wants to reject matching attack signatures and temporarily block clients that exceed a per-IP request threshold. Which control should it configure?",
+      answers: [
+        { text: "Attach a Cloud Armor security policy with preconfigured WAF rules and a rate-based ban rule keyed by client IP", explanation: "Correct. Preconfigured WAF rules detect supported web attack patterns, while a rate-based ban rule can temporarily block a client after it exceeds the configured per-IP threshold." },
+        { text: "Attach a Cloud Armor policy with only a rate-based throttle rule keyed by client IP", explanation: "Incorrect. Throttling can limit excess requests, but the policy also needs WAF rules for the attack signatures and the requested temporary ban behavior." },
+        { text: "Add VPC firewall rules that deny TCP connections after a client IP exceeds the threshold", explanation: "Incorrect. VPC firewall rules operate on network traffic and do not inspect HTTP requests for SQL injection signatures or implement Cloud Armor's request rate-based ban policy." },
+        { text: "Enable Cloud IDS packet inspection and configure it to block matching HTTP requests", explanation: "Incorrect. Cloud IDS detects network threats through traffic inspection, but it is not the inline HTTP policy enforcement point for the load balancer's WAF and rate-based ban rules." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "application-security", "networking", "advanced"],
+      source: S.CLOUD_ARMOR_RATE_LIMITING
     }
   ];
 })();

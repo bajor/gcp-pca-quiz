@@ -2,7 +2,7 @@
 
 [Open the quiz](https://bajor.github.io/gcp-pca-quiz/)
 
-A dependency-free, static practice quiz for the Google Cloud Certified Professional Cloud Architect (PCA) exam. It has 110 original, scenario-based questions, including 60 advanced multi-constraint scenarios tagged `advanced`. Every question has exactly four choices, an explanation for every choice, and a link to the relevant official Google Cloud documentation.
+A dependency-free, static practice quiz for the Google Cloud Certified Professional Cloud Architect (PCA) exam. It has 130 original, scenario-based questions, including 80 advanced multi-constraint scenarios tagged `advanced`. Every question has exactly four choices, an explanation for every choice, and a link to the relevant official Google Cloud documentation.
 
 This is a study aid, not an official Google exam product. It is not affiliated with or endorsed by Google.
 
@@ -12,13 +12,13 @@ The question bank follows the six capability areas listed on the [official Profe
 
 | Exam capability area | Questions |
 | --- | ---: |
-| Design and plan a cloud solution architecture | 27 |
-| Manage and provision cloud solution infrastructure | 17 |
-| Design for security and compliance | 21 |
-| Analyze and optimize technical and business processes | 18 |
-| Manage implementations of cloud architecture | 11 |
-| Ensure solution and operations excellence | 16 |
-| **Total** | **110** |
+| Design and plan a cloud solution architecture | 32 |
+| Manage and provision cloud solution infrastructure | 20 |
+| Design for security and compliance | 25 |
+| Analyze and optimize technical and business processes | 21 |
+| Manage implementations of cloud architecture | 13 |
+| Ensure solution and operations excellence | 19 |
+| **Total** | **130** |
 
 ## Sources and attribution
 

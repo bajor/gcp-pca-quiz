@@ -122,6 +122,26 @@
     GKE_NODE_UPGRADES: googleCloudSource("GKE node upgrade strategies", "https://cloud.google.com/kubernetes-engine/docs/concepts/node-pool-upgrade-strategies", CURRENT_ACCESS_DATE),
     CLOUD_RUN_SERVICE_HEALTH: googleCloudSource("Cloud Run cross-region service health", "https://cloud.google.com/run/docs/configuring/configure-service-health", CURRENT_ACCESS_DATE),
     PUBSUB_DEAD_LETTER: googleCloudSource("Pub/Sub dead-letter topics", "https://cloud.google.com/pubsub/docs/dead-letter-topics", CURRENT_ACCESS_DATE),
-    STORAGE_SOFT_DELETE: googleCloudSource("Cloud Storage soft delete", "https://cloud.google.com/storage/docs/soft-delete", CURRENT_ACCESS_DATE)
+    STORAGE_SOFT_DELETE: googleCloudSource("Cloud Storage soft delete", "https://cloud.google.com/storage/docs/soft-delete", CURRENT_ACCESS_DATE),
+    CLOUD_CDN_SIGNED_URLS: googleCloudSource("Cloud CDN signed URLs", "https://cloud.google.com/cdn/docs/using-signed-urls", CURRENT_ACCESS_DATE),
+    DATASTREAM: googleCloudSource("Datastream overview", "https://cloud.google.com/datastream/docs/overview", CURRENT_ACCESS_DATE),
+    PUBSUB_ORDERING: googleCloudSource("Pub/Sub message ordering", "https://cloud.google.com/pubsub/docs/ordering", CURRENT_ACCESS_DATE),
+    EVENTARC: googleCloudSource("Eventarc overview", "https://cloud.google.com/eventarc/docs/overview", CURRENT_ACCESS_DATE),
+    TRANSFER_APPLIANCE: googleCloudSource("Transfer Appliance overview", "https://cloud.google.com/transfer-appliance/docs/4.0/overview", CURRENT_ACCESS_DATE),
+    COMPUTE_EXTERNAL_IP_POLICY: googleCloudSource("Restrict external IP access to Compute Engine instances", "https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address", CURRENT_ACCESS_DATE),
+    CLOUD_NAT: googleCloudSource("Public NAT", "https://cloud.google.com/nat/docs/public-nat", CURRENT_ACCESS_DATE),
+    CLOUD_DNS_FORWARDING: googleCloudSource("Cloud DNS forwarding zones", "https://cloud.google.com/dns/docs/zones/forwarding-zones", CURRENT_ACCESS_DATE),
+    BIGQUERY_ROW_SECURITY: googleCloudSource("BigQuery row-level and column-level security", "https://cloud.google.com/bigquery/docs/security-center-overview", CURRENT_ACCESS_DATE),
+    IAM_POLICY_TROUBLESHOOTER: googleCloudSource("Troubleshoot IAM permissions", "https://cloud.google.com/iam/docs/troubleshoot-policies", CURRENT_ACCESS_DATE),
+    KMS_KEY_ROTATION: googleCloudSource("Cloud KMS key rotation", "https://cloud.google.com/kms/docs/key-rotation", CURRENT_ACCESS_DATE),
+    CLOUD_ARMOR_RATE_LIMITING: googleCloudSource("Cloud Armor rate limiting", "https://cloud.google.com/armor/docs/rate-limiting-overview", CURRENT_ACCESS_DATE),
+    ASSET_CHANGE_FEEDS: googleCloudSource("Monitor asset changes with Pub/Sub", "https://cloud.google.com/asset-inventory/docs/monitoring-asset-changes", CURRENT_ACCESS_DATE),
+    CONNECTIVITY_TESTS: googleCloudSource("Connectivity Tests overview", "https://cloud.google.com/network-intelligence-center/docs/connectivity-tests/concepts/overview", CURRENT_ACCESS_DATE),
+    CLOUD_TRACE: googleCloudSource("Cloud Trace overview", "https://cloud.google.com/trace/docs/overview", CURRENT_ACCESS_DATE),
+    CLOUD_DEPLOY_APPROVALS: googleCloudSource("Cloud Deploy approvals", "https://cloud.google.com/deploy/docs/promote-release", CURRENT_ACCESS_DATE),
+    CLOUD_DEPLOY_ARCHITECTURE: googleCloudSource("Cloud Deploy service architecture", "https://cloud.google.com/deploy/docs/architecture", CURRENT_ACCESS_DATE),
+    GKE_BACKUP: googleCloudSource("Backup for GKE backup plans", "https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/how-to/backup-plan", CURRENT_ACCESS_DATE),
+    PUBSUB_REPLAY: googleCloudSource("Replay and purge messages with Pub/Sub seek", "https://cloud.google.com/pubsub/docs/replay-overview", CURRENT_ACCESS_DATE),
+    GKE_DISRUPTION_READINESS: googleCloudSource("GKE workload disruption readiness", "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-disruption-readiness", CURRENT_ACCESS_DATE)
   });
 })();

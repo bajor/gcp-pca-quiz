@@ -224,6 +224,45 @@
       correct: 3,
       tags: ["manage-provision", "compute", "placement", "advanced"],
       source: S.COMPACT_PLACEMENT
+    },
+    {
+      id: "infrastructure-organization-policy-external-ip-allowlist",
+      prompt: "A company wants to prevent new Compute Engine VMs in every current and future project from receiving external IP addresses. A small set of named administrative VMs are approved exceptions. Which preventive control should it apply?",
+      answers: [
+        { text: "Enforce the compute.vmExternalIpAccess Organization Policy constraint at the organization and allowlist only the approved VM instances", explanation: "Correct. The constraint can be inherited across the organization and restrict external IP access to explicitly allowed VM instances, covering creation paths outside a particular deployment pipeline." },
+        { text: "Apply a VPC firewall rule that denies ingress from the internet to TCP ports on all VM subnets", explanation: "Incorrect. A firewall rule can limit inbound traffic, but it does not prevent a VM from being created with an external IP or address the stated resource-creation control." },
+        { text: "Add an IAM condition to the Terraform deployer role that rejects VM requests with an external IP", explanation: "Incorrect. This limits one deployer path, but other principals and services could create VMs unless a resource-level governance policy also blocks the configuration." },
+        { text: "Reserve static external addresses for the approved VMs and ask project owners not to assign ephemeral addresses elsewhere", explanation: "Incorrect. Reserving approved addresses does not prevent other VM creators from assigning ephemeral external addresses." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "governance", "networking", "advanced"],
+      source: S.COMPUTE_EXTERNAL_IP_POLICY
+    },
+    {
+      id: "infrastructure-cloud-nat-static-egress-high-connections",
+      prompt: "Private Compute Engine VMs must call a partner API that allowlists a fixed set of source IP addresses. The VMs cannot have external IPs, and a burst of outbound connections can exhaust fixed per-VM port allocations. Which design best fits?",
+      answers: [
+        { text: "Configure Public Cloud NAT with manually assigned reserved external IPs and dynamic port allocation", explanation: "Correct. Public NAT provides outbound connectivity without VM external IPs, manual allocation keeps the source addresses within a known set, and dynamic port allocation adjusts per-VM ports within configured limits as usage changes." },
+        { text: "Configure Public Cloud NAT with automatic external IP allocation and static port allocation", explanation: "Incorrect. NAT can provide private-VM egress, but automatically allocated addresses do not give the partner a fixed, administrator-selected allowlist." },
+        { text: "Assign one reserved external IP to every VM and increase the VM machine type to provide more source ports", explanation: "Incorrect. Direct external IPs violate the requirement that VMs remain private, and machine size does not replace Cloud NAT port allocation controls." },
+        { text: "Use a Cloud NAT gateway with manual external IPs and leave fixed port allocation at its current default", explanation: "Incorrect. Manual addresses meet the allowlist requirement, but the stated burst can exhaust the fixed per-VM port allocation; it will not expand dynamically with connection demand." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "networking", "hybrid-networking", "advanced"],
+      source: S.CLOUD_NAT
+    },
+    {
+      id: "infrastructure-cloud-dns-forwarding-to-onprem",
+      prompt: "VMs in a VPC must resolve names under corp.example.com using authoritative DNS servers in an on-premises data center. The VPC already reaches that data center through HA VPN, DNS traffic and return routes are permitted, and the on-premises DNS team remains the source of truth. Which Cloud DNS configuration should the team use?",
+      answers: [
+        { text: "Create a private forwarding zone for corp.example.com, target the on-premises DNS server IPs, and authorize the VPC", explanation: "Correct. A forwarding zone sends queries for the matching private DNS suffix to its configured name-server targets, while the VPN provides the route to the on-premises DNS servers." },
+        { text: "Create a private zone for corp.example.com and manually copy all on-premises records into Cloud DNS", explanation: "Incorrect. A private zone would make Cloud DNS the local record source and require ongoing synchronization instead of forwarding queries to the authoritative on-premises servers." },
+        { text: "Create a DNS peering zone for corp.example.com that points to the on-premises network", explanation: "Incorrect. DNS peering shares name resolution between VPC networks; it does not forward queries to arbitrary on-premises DNS servers." },
+        { text: "Create an inbound server policy so VPC VMs can send DNS queries to on-premises servers", explanation: "Incorrect. An inbound server policy lets on-premises DNS clients query Cloud DNS through a VPC; it does not provide the required outbound forwarding from VPC clients to on-premises DNS." }
+      ],
+      correct: 0,
+      tags: ["manage-provision", "networking", "hybrid-networking", "advanced"],
+      source: S.CLOUD_DNS_FORWARDING
     }
   ];
 })();

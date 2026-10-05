@@ -211,6 +211,45 @@
       correct: 3,
       tags: ["reliability", "storage", "data-protection", "advanced"],
       source: S.STORAGE_SOFT_DELETE
+    },
+    {
+      id: "reliability-gke-pdb-node-maintenance",
+      prompt: "A four-replica stateless workload runs in a regional GKE cluster with enough capacity to reschedule Pods. During normal node maintenance, operators want Kubernetes to reject voluntary evictions that would take healthy replicas below three; they know a disruption budget cannot prevent involuntary failures and GKE might eventually force a drain. Which workload configuration expresses this policy?",
+      answers: [
+        { text: "Add a PodDisruptionBudget with a matching Pod selector and minAvailable set to 3, and configure readiness probes", explanation: "Correct. A matching PodDisruptionBudget limits voluntary evictions using Pod health, and readiness probes let Kubernetes distinguish ready Pods from merely running ones. A PDB does not prevent involuntary failures, and GKE can eventually force a drain after its documented wait." },
+        { text: "Add a PodDisruptionBudget with minAvailable set to 4 and omit readiness probes", explanation: "Incorrect. Requiring every replica to remain available can block ordinary node maintenance, and without readiness probes the budget has limited visibility into application health." },
+        { text: "Set the Horizontal Pod Autoscaler's minimum replica count to 3 and omit a disruption budget", explanation: "Incorrect. An autoscaler's minimum count controls desired replica scaling, but it does not constrain voluntary eviction of existing Pods during a node drain." },
+        { text: "Set the Pods' priority class to the highest value and rely on the scheduler to prevent their eviction", explanation: "Incorrect. Priority affects scheduling and preemption decisions; it does not define how many Pods may be voluntarily disrupted during maintenance." }
+      ],
+      correct: 0,
+      tags: ["reliability", "containers", "gke", "advanced"],
+      source: S.GKE_DISRUPTION_READINESS
+    },
+    {
+      id: "reliability-backup-for-gke-namespace-recovery",
+      prompt: "An application team must recover a deleted Kubernetes namespace, including its resource definitions and Persistent Disk volume data, to an isolated GKE cluster for validation. Recovery can use the latest scheduled backup, and active-active service is not required. Which approach fits?",
+      answers: [
+        { text: "Create a Backup for GKE backup plan that includes the namespace resources and volume data, then restore that backup to the isolated cluster", explanation: "Correct. Backup for GKE can back up Kubernetes resources and persistent volume data and restore them to a cluster, supporting the requested point-in-time recovery and validation workflow." },
+        { text: "Use Config Sync to reconcile the namespace manifests into the isolated cluster", explanation: "Incorrect. Config Sync can restore desired configuration from a source of truth, but it does not restore the Persistent Disk volume data requested here." },
+        { text: "Create Persistent Disk snapshots for the application's volumes and attach them to newly written namespace manifests", explanation: "Incorrect. Disk snapshots can protect volume contents, but they do not capture and restore the Kubernetes resource definitions and namespace state as one managed GKE backup." },
+        { text: "Create a second regional GKE cluster and rely on the regional control plane to recover the deleted namespace", explanation: "Incorrect. A second cluster provides another runtime location, but it does not automatically preserve or restore deleted Kubernetes resources and volume data." }
+      ],
+      correct: 0,
+      tags: ["reliability", "containers", "disaster-recovery", "advanced"],
+      source: S.GKE_BACKUP
+    },
+    {
+      id: "reliability-pubsub-replay-before-release",
+      prompt: "A subscriber deployment acknowledged some messages before discovering a processing defect. The team created a Pub/Sub snapshot immediately before the deployment and needs to redeliver messages to that same subscription from the captured acknowledgment state. What should it do?",
+      answers: [
+        { text: "Seek the subscription to the snapshot and make the corrected subscriber idempotent", explanation: "Correct. Seeking to the snapshot restores the captured acknowledgment state, making messages that were unacknowledged at that point eligible for redelivery. Idempotent processing remains important because delivery is at least once." },
+        { text: "Seek the subscription to a timestamp before deployment without enabling acknowledged-message retention", explanation: "Incorrect. Seeking to a timestamp requires the relevant messages to be retained, including acknowledged messages when they must be replayed; the snapshot is the available recovery point in this scenario." },
+        { text: "Create a dead-letter topic and configure its delivery attempt threshold to replay already acknowledged messages", explanation: "Incorrect. Dead-letter policies handle repeatedly undeliverable messages; they do not change the acknowledgment state of successfully acknowledged messages." },
+        { text: "Create a new subscription on the topic and assume it will receive only messages acknowledged after the snapshot", explanation: "Incorrect. A new subscription does not inherit the original subscription's acknowledgment state; seeking the existing subscription to its snapshot provides the required replay point." }
+      ],
+      correct: 0,
+      tags: ["reliability", "messaging", "pubsub", "advanced"],
+      source: S.PUBSUB_REPLAY
     }
   ];
 })();

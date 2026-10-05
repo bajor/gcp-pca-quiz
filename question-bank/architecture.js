@@ -354,6 +354,71 @@
       correct: 0,
       tags: ["design-and-plan", "networking", "serverless", "advanced"],
       source: S.CLOUD_RUN_VPC
+    },
+    {
+      id: "architecture-cloud-cdn-private-media-signed-urls",
+      prompt: "A media service stores large video objects in a private Cloud Storage bucket. Viewers without Google accounts need time-limited access to individual videos, and repeat downloads should be served from a global cache rather than through the application. Which design best fits?",
+      answers: [
+        { text: "Enable Cloud CDN on a backend bucket, configure Cloud CDN signed URLs, and grant the Cloud CDN service identity access to the private bucket", explanation: "Correct. Cloud CDN signed URLs authorize time-limited access through the cache, while private bucket access lets the CDN retrieve objects without making the bucket public or proxying video through the application." },
+        { text: "Generate Cloud Storage signed URLs for the private objects and have viewers download directly from the bucket", explanation: "Incorrect. Cloud Storage signed URLs provide time-limited access, but direct bucket requests bypass the Cloud CDN cache requested by the scenario." },
+        { text: "Enable Cloud CDN on a backend bucket and grant allUsers object viewer access so the CDN can fetch objects", explanation: "Incorrect. Public bucket access would let users bypass the time-limited authorization and read objects directly from the origin." },
+        { text: "Put a Cloud Run proxy behind an external Application Load Balancer and stream each video to the viewer", explanation: "Incorrect. A proxy can enforce application authorization, but it keeps large object delivery on the application path and does not meet the requirement to serve repeat downloads from the CDN cache." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "storage", "networking", "advanced"],
+      source: S.CLOUD_CDN_SIGNED_URLS
+    },
+    {
+      id: "architecture-datastream-database-to-bigquery-cdc",
+      prompt: "A company must replicate an operational PostgreSQL database into BigQuery. Analysts need an initial historical load followed by near-real-time inserts, updates, and deletes, while the team wants to avoid maintaining database-log readers and batch export jobs. Which service should it use?",
+      answers: [
+        { text: "Datastream with a BigQuery destination and a stream configured for backfill and change data capture", explanation: "Correct. Datastream performs an initial backfill and then continuously replicates supported database changes to BigQuery without requiring the team to operate its own change-log reader." },
+        { text: "Database Migration Service with BigQuery as the migration destination", explanation: "Incorrect. Database Migration Service supports database migration workflows, but it does not provide the described direct continuous replication into BigQuery." },
+        { text: "A scheduled Dataflow batch job that queries the source tables every few minutes", explanation: "Incorrect. Polling tables can miss or duplicate changes and requires the team to build checkpointing and delete detection instead of using source change logs." },
+        { text: "Storage Transfer Service to copy database data files into a BigQuery dataset", explanation: "Incorrect. Storage Transfer Service moves objects between storage locations; copying database files does not apply transactional row-level inserts, updates, and deletes to BigQuery." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "analytics", "databases", "advanced"],
+      source: S.DATASTREAM
+    },
+    {
+      id: "architecture-pubsub-per-entity-ordering",
+      prompt: "An order-processing system publishes status events for thousands of orders. Events for the same order must be delivered in publish order, but unrelated orders should continue processing concurrently. Which Pub/Sub design best meets the requirement?",
+      answers: [
+        { text: "Publish every event with the same global ordering key and enable message ordering on the subscription", explanation: "Incorrect. A single key preserves order but serializes unrelated orders behind the same ordering stream, reducing the required concurrency." },
+        { text: "Set each order ID as its message ordering key and enable message ordering on the subscription", explanation: "Correct. Pub/Sub preserves ordering for messages with the same key, allowing each order's events to remain ordered while different keys are processed independently." },
+        { text: "Create one topic per order and let consumers subscribe to every topic", explanation: "Incorrect. Separate topics could isolate order streams, but creating and managing a topic for each order is not a scalable substitute for ordering keys." },
+        { text: "Publish without ordering keys and have consumers sort each batch by event timestamp", explanation: "Incorrect. Sorting a received batch cannot guarantee order across separate deliveries or prevent a later event from being processed before an earlier one." }
+      ],
+      correct: 1,
+      tags: ["design-and-plan", "integration", "messaging", "advanced"],
+      source: S.PUBSUB_ORDERING
+    },
+    {
+      id: "architecture-eventarc-cloud-storage-trigger",
+      prompt: "When an object is finalized in one Cloud Storage bucket, a Cloud Run service must start processing it. The service should receive managed event delivery with retries, and the team does not want to poll the bucket or modify the uploader. Which design is the best fit?",
+      answers: [
+        { text: "Create an Eventarc trigger for the Cloud Storage object-finalized event, filter it to the bucket, and route it to the Cloud Run service", explanation: "Correct. Eventarc routes supported Cloud Storage events to Cloud Run, and filtering the trigger to the bucket avoids polling or adding event-publishing logic to the uploader." },
+        { text: "Create a Cloud Scheduler job that lists the bucket on a short interval and invokes the service for new objects", explanation: "Incorrect. Polling adds recurring API calls and requires state to distinguish new objects, while the requirement is for event-driven delivery." },
+        { text: "Configure a Cloud Tasks queue with one recurring task for each object name", explanation: "Incorrect. Cloud Tasks dispatches explicitly created tasks to a handler; it does not observe Cloud Storage object events or create tasks when objects arrive." },
+        { text: "Run a Cloud Run job on a schedule and scan the bucket before exiting", explanation: "Incorrect. A scheduled scan can eventually find objects, but it is batch polling rather than managed event delivery when an object is finalized." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "integration", "event-driven", "advanced"],
+      source: S.EVENTARC
+    },
+    {
+      id: "architecture-transfer-appliance-limited-bandwidth",
+      prompt: "A research organization must move 200 TB of historical files into Cloud Storage within six weeks. Its existing internet link is 100 Mbps, a new circuit is not feasible, and shipping encrypted equipment is permitted. Which transfer method should it choose?",
+      answers: [
+        { text: "Use Transfer Appliance in offline mode, copy the files to the appliance, and ship it to Google for ingestion", explanation: "Correct. Transfer Appliance moves bulk data without consuming the constrained outbound internet link, making it appropriate when an online transfer would exceed the deadline." },
+        { text: "Run Storage Transfer Service for on-premises data over the existing 100-Mbps connection", explanation: "Incorrect. The managed service can transfer the files, but the available network bandwidth remains the bottleneck and cannot meet the stated schedule." },
+        { text: "Use gsutil parallel composite uploads over the existing connection", explanation: "Incorrect. Parallel uploads can improve utilization of available bandwidth, but they cannot overcome the link's total capacity for this data volume." },
+        { text: "Order Dedicated Interconnect and transfer the files through a new private circuit", explanation: "Incorrect. Interconnect could provide high-throughput connectivity, but the scenario rules out establishing a new circuit and permits physical transfer instead." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "migration", "storage", "advanced"],
+      source: S.TRANSFER_APPLIANCE
     }
   ];
 })();

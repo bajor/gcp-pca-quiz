@@ -146,6 +146,32 @@
       correct: 0,
       tags: ["manage-implementation", "containers", "gke-upgrades", "advanced"],
       source: S.GKE_NODE_UPGRADES
+    },
+    {
+      id: "implementation-cloud-deploy-production-approval",
+      prompt: "A Cloud Deploy pipeline has deployed a release to staging. Promotion to production must pause until an authorized human reviews the staging result, and the approval must be recorded as part of the rollout. Which configuration should the team use?",
+      answers: [
+        { text: "Set requireApproval on the production target and have an authorized Cloud Deploy approver approve the rollout", explanation: "Correct. A target configured to require approval holds the rollout before deployment, and an authorized approver's decision is recorded in the Cloud Deploy rollout state." },
+        { text: "Add a Cloud Build manual approval before the application image is built", explanation: "Incorrect. A build approval gates artifact production, but the requirement is to review the deployed staging result before promotion to the production target." },
+        { text: "Require Binary Authorization to attest the production image digest", explanation: "Incorrect. Binary Authorization can reject unapproved images at deployment admission, but it does not provide the human rollout approval gate requested for production promotion." },
+        { text: "Add a Cloud Deploy verification job that automatically approves production when tests pass", explanation: "Incorrect. Verification runs automated checks after deployment; it does not pause for a human decision or record the required manual approval." }
+      ],
+      correct: 0,
+      tags: ["manage-implementation", "ci-cd", "progressive-delivery", "advanced"],
+      source: S.CLOUD_DEPLOY_APPROVALS
+    },
+    {
+      id: "implementation-cloud-deploy-promote-immutable-image",
+      prompt: "A release must use the exact same tested container image in staging and production, while a few environment settings can differ by target. The team wants an auditable promotion path and must avoid rebuilding or resolving a mutable image tag at each stage. Which implementation is best?",
+      answers: [
+        { text: "Build once, publish the image to Artifact Registry, create one Cloud Deploy release referencing its immutable digest, and promote that release with target-specific deployment parameters", explanation: "Correct. The release retains the built artifact reference for successive targets, so promotion uses the same image digest while deploy parameters provide target-specific configuration." },
+        { text: "Build a separate image for each target and apply the same mutable release tag after each build", explanation: "Incorrect. Rebuilding can produce different image contents, and moving the same tag does not prove that staging and production ran the same artifact." },
+        { text: "Build once, tag the image as latest, and configure each target to pull latest during its rollout", explanation: "Incorrect. The latest tag can move between target deployments, so each target might resolve to a different image even though the team intended one release." },
+        { text: "Build once, push the image, and let each target's deployment manifest select an image by repository name without a digest", explanation: "Incorrect. A repository name without an immutable digest can resolve to a changed tag or artifact and does not preserve the release's exact tested image." }
+      ],
+      correct: 0,
+      tags: ["manage-implementation", "ci-cd", "artifact-management", "advanced"],
+      source: S.CLOUD_DEPLOY_ARCHITECTURE
     }
   ];
 })();

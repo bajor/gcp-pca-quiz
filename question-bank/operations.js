@@ -237,6 +237,45 @@
       correct: 2,
       tags: ["analyze-optimize", "observability", "monitoring", "advanced"],
       source: S.MONITORING_METRICS_SCOPE
+    },
+    {
+      id: "operations-asset-inventory-iam-change-feed",
+      prompt: "A governance application must receive Cloud Asset Inventory notifications when IAM policy assets change in a set of projects, so it can reconcile its records without periodically polling asset history. Which design should it use?",
+      answers: [
+        { text: "Create Cloud Asset Inventory feeds for IAM_POLICY changes at the required resource scope and publish the feed notifications to Pub/Sub", explanation: "Correct. Cloud Asset Inventory feeds publish notifications about selected asset changes, including IAM policy changes, to Pub/Sub for event-driven processing." },
+        { text: "Poll Cloud Asset Inventory's IAM policy search API on a short interval and compare each result with the previous response", explanation: "Incorrect. Polling can detect differences eventually, but it adds repeated queries and does not provide the change-driven feed requested." },
+        { text: "Create an aggregated Cloud Audit Logs sink for Admin Activity logs and parse policy-change audit entries from Pub/Sub", explanation: "Incorrect. An aggregated sink can route audit events about policy changes, but it delivers log entries rather than Cloud Asset Inventory asset-change notifications for the governance application's reconciliation flow." },
+        { text: "Schedule Cloud Asset Inventory exports to Cloud Storage and trigger a batch comparison after each export", explanation: "Incorrect. This can identify inventory differences after each scheduled export, but it is a periodic snapshot workflow rather than event notifications." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "governance", "automation", "advanced"],
+      source: S.ASSET_CHANGE_FEEDS
+    },
+    {
+      id: "operations-connectivity-tests-hybrid-path",
+      prompt: "A VM cannot reach an on-premises service through an existing Cloud Interconnect connection. The network team needs to identify whether the configured route, firewall rule, or hybrid path predicts a drop, without changing the production traffic. Which diagnostic should it run first?",
+      answers: [
+        { text: "A Network Intelligence Center Connectivity Test from the VM to the on-premises destination IP", explanation: "Correct. Connectivity Tests analyze the configured packet path through VPC routes, firewall rules, and supported hybrid connectivity, and report where the modeled path is dropped." },
+        { text: "A Cloud Monitoring uptime check from a Google-managed probe to the private on-premises IP", explanation: "Incorrect. An uptime check is useful for supported reachable endpoints, but it does not analyze the VM's configured VPC and Interconnect forwarding path or identify the blocking rule." },
+        { text: "A Cloud Logging sink that exports all subnet logs to BigQuery", explanation: "Incorrect. A sink routes existing logs and does not simulate or analyze the configured path between the VM and destination." },
+        { text: "A VPC Flow Logs query for packets from the VM, without checking network configuration", explanation: "Incorrect. Flow Logs can provide observations about sampled traffic, but they do not model the expected route and firewall evaluation to identify a configuration-level drop before changing production traffic." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "networking", "troubleshooting", "advanced"],
+      source: S.CONNECTIVITY_TESTS
+    },
+    {
+      id: "operations-cloud-trace-distributed-latency",
+      prompt: "A customer request intermittently takes three seconds across a Cloud Run API and two downstream services. The team needs to see how much time each service call and request span contributes, rather than only the overall latency distribution. Which observability tool should it use?",
+      answers: [
+        { text: "Cloud Trace with distributed tracing instrumentation across the services", explanation: "Correct. Cloud Trace correlates spans in a request trace so the team can inspect latency across service calls and identify which part of the request path is slow." },
+        { text: "Cloud Profiler on the Cloud Run API instances", explanation: "Incorrect. Profiler identifies CPU and memory-allocation hotspots in application code, but it does not provide the requested request-by-request timing across service boundaries." },
+        { text: "Cloud Monitoring dashboards with one request-latency chart per service", explanation: "Incorrect. Aggregate charts can show that latency increased, but they do not correlate an individual request's spans across the services it called." },
+        { text: "Error Reporting grouped by exception type", explanation: "Incorrect. Error Reporting groups and tracks application exceptions, but the slow requests may succeed and the tool does not break their latency into distributed spans." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "observability", "performance", "advanced"],
+      source: S.CLOUD_TRACE
     }
   ];
 })();
