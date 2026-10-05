@@ -289,6 +289,71 @@
       correct: 0,
       tags: ["design-and-plan", "integration", "api-management", "advanced"],
       source: S.APIGEE
+    },
+    {
+      id: "architecture-bigquery-omni-s3-in-place",
+      prompt: "A data team needs to run BigQuery SQL over a large dataset that remains in Amazon S3. Data residency policy prohibits copying the raw dataset into Google Cloud, and analysts should use a BigQuery table abstraction. Which design best fits?",
+      answers: [
+        { text: "Create a BigLake table over the S3 data with BigQuery Omni in a supported, colocated region", explanation: "Correct. BigQuery Omni processes queries near supported S3 data and BigLake tables provide the BigQuery table abstraction without requiring the raw dataset to be copied into Google Cloud." },
+        { text: "Configure a recurring Storage Transfer Service job to copy S3 objects into a BigQuery landing bucket", explanation: "Incorrect. This creates a copy of the raw data in Google Cloud, violating the residency requirement even if the transfer is incremental." },
+        { text: "Load the S3 objects into native BigQuery tables with the BigQuery Data Transfer Service before each analysis", explanation: "Incorrect. Loading data into native BigQuery tables moves and stores the dataset in Google Cloud rather than querying it in place." },
+        { text: "Run Amazon Athena queries and export each result set to BigQuery before analysts can use SQL", explanation: "Incorrect. This keeps the source data in S3 but moves results through a separate query system and does not provide analysts the requested BigQuery table abstraction over the source." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "analytics", "multicloud", "advanced"],
+      source: S.BIGQUERY_OMNI
+    },
+    {
+      id: "architecture-cloud-run-jobs-parallel-shards",
+      prompt: "A containerized batch process must handle 8,000 independent file shards. Each shard can run for up to 40 minutes, may need a bounded retry, and the downstream database can accept only 60 concurrent workers. The team does not want to operate a cluster. Which execution design best fits?",
+      answers: [
+        { text: "Run a Cloud Run service with 8,000 concurrent HTTP requests and rely on its instance concurrency setting to cap database sessions", explanation: "Incorrect. A service handles requests rather than finite indexed job tasks, and per-instance request concurrency does not directly impose the requested total worker limit across autoscaled instances." },
+        { text: "Run one Cloud Run job with 8,000 tasks, set parallelism to 60 and a task timeout of at least 40 minutes, and make each task idempotent for retries", explanation: "Correct. Cloud Run jobs support many independent tasks, a configurable maximum task parallelism, per-task timeouts and bounded retries. Idempotent tasks protect against repeating a shard after a failed attempt." },
+        { text: "Submit the workload to Cloud Batch with a managed instance template and task group", explanation: "Incorrect. Cloud Batch is a valid managed batch service, but it adds VM provisioning and compute configuration for independent container shards that Cloud Run Jobs can run serverlessly with a direct task-parallelism limit." },
+        { text: "Create a long-running Managed Service for Apache Spark cluster and launch one Spark executor per file", explanation: "Incorrect. Spark can process parallel files, but it introduces a cluster and a different execution model when the existing work is already partitioned into independent container tasks." }
+      ],
+      correct: 1,
+      tags: ["design-and-plan", "compute", "batch", "advanced"],
+      source: S.CLOUD_RUN_JOBS
+    },
+    {
+      id: "architecture-gke-multicluster-gateway-services",
+      prompt: "A company runs the same Kubernetes service in GKE clusters in three regions. It needs a single Gateway API entry point to route clients to service endpoints across those clusters, while keeping cluster membership and service discovery under fleet management. Which design should it use?",
+      answers: [
+        { text: "Create a separate Ingress in each cluster and publish all ingress IPs in a round-robin DNS record", explanation: "Incorrect. This creates independent frontends and DNS-based selection rather than the requested single Gateway API entry point with fleet-based multi-cluster service discovery." },
+        { text: "Create a multi-cluster Service but keep a standard single-cluster Gateway controller", explanation: "Incorrect. Multi-cluster Services provide cross-cluster service discovery, but a standard single-cluster Gateway controller does not provide the multi-cluster Gateway data plane and routing behavior." },
+        { text: "Register the clusters to a fleet, enable multi-cluster Services, and configure a multi-cluster Gateway", explanation: "Correct. GKE multi-cluster Gateways use fleet membership and multi-cluster Services to discover and route to Kubernetes Services across participating clusters through Gateway API resources." },
+        { text: "Configure GKE Multi-cluster Ingress with a global external Application Load Balancer", explanation: "Incorrect. Multi-cluster Ingress can provide global multi-cluster routing, but it uses the Ingress API rather than the requested Gateway API entry point and multi-cluster Gateway controller." }
+      ],
+      correct: 2,
+      tags: ["design-and-plan", "containers", "networking", "advanced"],
+      source: S.GKE_MULTICLUSTER_GATEWAY
+    },
+    {
+      id: "architecture-composer-existing-airflow-dags",
+      prompt: "An analytics team has hundreds of production Apache Airflow DAGs with custom operators, Python dependencies, and schedules. It wants Google to manage the Airflow environment while preserving the DAG programming model and existing orchestration integrations. Which service is the best fit?",
+      answers: [
+        { text: "Workflows, translating each Airflow operator directly into a Workflows YAML step without changing the DAGs", explanation: "Incorrect. Workflows is a managed service-orchestration engine, but it does not execute Apache Airflow DAGs or Airflow operators directly." },
+        { text: "Cloud Scheduler with one job for each Airflow task", explanation: "Incorrect. Scheduler triggers recurring jobs but does not provide Airflow's DAG dependency graph, task state, retries, and scheduling semantics." },
+        { text: "A Cloud Run job for each DAG, with task dependencies encoded as container startup scripts", explanation: "Incorrect. Cloud Run jobs execute finite tasks but do not provide the Airflow scheduler, DAG state model, operator ecosystem, or managed Airflow compatibility required." },
+        { text: "Managed Service for Apache Airflow, using a Composer environment for the existing DAGs", explanation: "Correct. Managed Service for Apache Airflow runs Apache Airflow as a managed service and is designed to operate Airflow DAGs, dependencies, operators, and integrations with Google Cloud." }
+      ],
+      correct: 3,
+      tags: ["design-and-plan", "analytics", "orchestration", "advanced"],
+      source: S.CLOUD_COMPOSER
+    },
+    {
+      id: "architecture-cloud-run-direct-vpc-egress-static-ip",
+      prompt: "A Cloud Run service must reach a private database through its VPC and call a third-party API through one static source IP. The team wants all outbound traffic routed through its VPC and does not want to manage a Serverless VPC Access connector. Which design meets the requirements?",
+      answers: [
+        { text: "Use Direct VPC egress with all traffic routed through the VPC, then configure Cloud NAT with a reserved external address", explanation: "Correct. Direct VPC egress connects Cloud Run instances to the VPC without a connector. Routing all egress through the VPC lets Cloud NAT provide the reserved source IP for the third-party API while private routes reach the database." },
+        { text: "Use Direct VPC egress for private ranges only and reserve a Cloud NAT address for the third-party API", explanation: "Incorrect. Private-ranges-only egress sends private database traffic through the VPC but sends public API traffic directly from Cloud Run, bypassing the Cloud NAT address." },
+        { text: "Use a Serverless VPC Access connector, route all traffic through it, and configure Cloud NAT with a reserved external address", explanation: "Incorrect. This can provide the required routing and static egress, but it retains the connector the team explicitly does not want to manage." },
+        { text: "Assign a reserved external address directly to the Cloud Run service and keep VPC egress disabled", explanation: "Incorrect. Cloud Run services do not attach a reserved external IP directly as their outbound address, and disabling VPC egress prevents the private database path." }
+      ],
+      correct: 0,
+      tags: ["design-and-plan", "networking", "serverless", "advanced"],
+      source: S.CLOUD_RUN_VPC
     }
   ];
 })();

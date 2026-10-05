@@ -198,6 +198,45 @@
       correct: 0,
       tags: ["analyze-optimize", "analytics", "cost-optimization", "advanced"],
       source: S.BIGQUERY_COSTS
+    },
+    {
+      id: "operations-bi-engine-dashboard-acceleration",
+      prompt: "A frequently refreshed executive dashboard queries a small, stable subset of BigQuery tables. The SQL is already efficient, but interactive latency remains too high. The team wants to accelerate compatible queries without maintaining a second aggregate dataset. What should it evaluate?",
+      answers: [
+        { text: "Reserve BI Engine capacity in the dataset's region and designate the dashboard tables as preferred tables", explanation: "Correct. BI Engine uses reserved in-memory capacity to accelerate many compatible BigQuery queries. Preferred tables help focus that capacity on the frequently queried dashboard data without creating a separate maintained copy." },
+        { text: "Create incremental materialized views for each dashboard query and let BigQuery rewrite compatible SQL", explanation: "Incorrect. Materialized views can accelerate eligible aggregates, but they maintain separate precomputed data, which the team wants to avoid." },
+        { text: "Increase the project's BigQuery query reservation slots and leave the dashboard tables unconfigured", explanation: "Incorrect. Query slots provide execution capacity, but they do not reserve BI Engine memory for caching the frequently accessed dashboard data." },
+        { text: "Export each dashboard result to Cloud Storage and configure the BI tool to query the exported files", explanation: "Incorrect. This introduces a separate refresh and storage path that can make results stale and does not accelerate the existing BigQuery API queries in memory." }
+      ],
+      correct: 0,
+      tags: ["analyze-optimize", "analytics", "performance", "advanced"],
+      source: S.BIGQUERY_BI_ENGINE
+    },
+    {
+      id: "operations-profiler-production-cpu-hotspot",
+      prompt: "After a release, a production service has high CPU utilization. Cloud Monitoring confirms the increase, and traces show that requests spend most of their time inside the service rather than waiting on dependencies. The team needs low-overhead, function-level CPU and allocation profiles across running replicas. Which tool should it use?",
+      answers: [
+        { text: "Cloud Trace, configured with a shorter trace sampling interval", explanation: "Incorrect. Trace helps locate latency across request spans and dependencies, but the scenario already localizes the time to the service and needs code-level CPU and allocation profiles." },
+        { text: "Cloud Profiler, enabled for the supported application runtime", explanation: "Correct. Cloud Profiler continuously collects statistical, low-overhead CPU and memory-allocation profiles from production applications, helping identify expensive code paths across replicas." },
+        { text: "Cloud Monitoring dashboards with one CPU chart for each VM", explanation: "Incorrect. Monitoring confirms resource utilization trends but does not attribute CPU samples or memory allocations to application functions." },
+        { text: "Cloud Logging queries that count requests by URL and status code", explanation: "Incorrect. Logs can identify request volume and errors, but counting log entries does not profile CPU or memory consumption inside the application code." }
+      ],
+      correct: 1,
+      tags: ["analyze-optimize", "observability", "performance", "advanced"],
+      source: S.CLOUD_PROFILER
+    },
+    {
+      id: "operations-monitoring-metrics-scope-multiple-projects",
+      prompt: "A central operations project must chart metrics and run alert policies against time series stored in 30 service projects. The teams retain ownership of their projects, and the metrics must not be copied or exported. What should the monitoring team configure?",
+      answers: [
+        { text: "Create an organization-level aggregated log sink from each project into the operations project", explanation: "Incorrect. Log sinks route log entries; they do not make metric time series available to charts and alert policies in a central monitoring project." },
+        { text: "Create one metrics scope per service project and link those scopes into the operations project", explanation: "Incorrect. A metrics scope is configured by a scoping project to include monitored projects; multiple independent scopes are not nested into one central scope." },
+        { text: "Make the operations project the scoping project and add the service projects to its Cloud Monitoring metrics scope", explanation: "Correct. A metrics scope lets a scoping project view and monitor time series stored in included projects without moving the monitored resources or exporting their metrics." },
+        { text: "Export every Monitoring metric to BigQuery and build alert policies from scheduled SQL queries", explanation: "Incorrect. Exporting would copy data and add a separate pipeline, while a metrics scope provides native cross-project monitoring visibility and alerting." }
+      ],
+      correct: 2,
+      tags: ["analyze-optimize", "observability", "monitoring", "advanced"],
+      source: S.MONITORING_METRICS_SCOPE
     }
   ];
 })();

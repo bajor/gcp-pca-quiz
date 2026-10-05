@@ -2,7 +2,7 @@
 
 [Open the quiz](https://bajor.github.io/gcp-pca-quiz/)
 
-A dependency-free, static practice quiz for the Google Cloud Certified Professional Cloud Architect (PCA) exam. It has 90 original, scenario-based questions, including 40 advanced multi-constraint scenarios tagged `advanced`. Every question has exactly four choices, an explanation for every choice, and a link to the relevant official Google Cloud documentation.
+A dependency-free, static practice quiz for the Google Cloud Certified Professional Cloud Architect (PCA) exam. It has 110 original, scenario-based questions, including 60 advanced multi-constraint scenarios tagged `advanced`. Every question has exactly four choices, an explanation for every choice, and a link to the relevant official Google Cloud documentation.
 
 This is a study aid, not an official Google exam product. It is not affiliated with or endorsed by Google.
 
@@ -12,19 +12,19 @@ The question bank follows the six capability areas listed on the [official Profe
 
 | Exam capability area | Questions |
 | --- | ---: |
-| Design and plan a cloud solution architecture | 22 |
-| Manage and provision cloud solution infrastructure | 14 |
-| Design for security and compliance | 17 |
-| Analyze and optimize technical and business processes | 15 |
-| Manage implementations of cloud architecture | 9 |
-| Ensure solution and operations excellence | 13 |
-| **Total** | **90** |
+| Design and plan a cloud solution architecture | 27 |
+| Manage and provision cloud solution infrastructure | 17 |
+| Design for security and compliance | 21 |
+| Analyze and optimize technical and business processes | 18 |
+| Manage implementations of cloud architecture | 11 |
+| Ensure solution and operations excellence | 16 |
+| **Total** | **110** |
 
 ## Sources and attribution
 
 Question scenarios and explanations are original. The factual claims are sourced from official Google Cloud documentation, including the Professional Cloud Architect certification page. Google Cloud documentation content is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), unless otherwise noted by Google.
 
-Each question includes source metadata in `question-bank/`. The required `commit` field records the documentation access date (`accessed-2026-10-04`) because Google Cloud documentation pages do not expose a source-control revision in the quiz UI.
+Each question includes source metadata in `question-bank/`. The required `commit` field records the documentation access date because Google Cloud documentation pages do not expose a source-control revision in the quiz UI.
 
 ## Local use
 

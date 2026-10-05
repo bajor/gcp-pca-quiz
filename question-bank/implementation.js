@@ -120,6 +120,32 @@
       correct: 1,
       tags: ["manage-implementation", "ci-cd", "progressive-delivery", "advanced"],
       source: S.CLOUD_DEPLOY_CANARY
+    },
+    {
+      id: "implementation-cloud-deploy-post-deployment-verification",
+      prompt: "After deploying a release to a staging target, a pipeline must run containerized integration tests against the deployed application. If a test fails, the rollout must record a failed verification instead of being treated as a successful deployment. Which Cloud Deploy feature should be configured?",
+      answers: [
+        { text: "A pre-deployment hook that validates the artifact signature before applying manifests", explanation: "Incorrect. A pre-deployment hook can validate an artifact before rollout, but it does not exercise the application after it is running in the staging target." },
+        { text: "A Cloud Build test step that runs before the image is published", explanation: "Incorrect. Build-time tests validate the artifact before deployment and cannot confirm the behavior of the deployed application and target configuration." },
+        { text: "A manual approval gate between staging and production with no automated tests", explanation: "Incorrect. Approval can require human authorization to promote, but it does not execute the requested integration tests or report their results as rollout verification." },
+        { text: "A Cloud Deploy verification phase with a verify task that runs the integration-test container", explanation: "Correct. Cloud Deploy runs configured verification tasks after deployment as part of the rollout. A failed verification is recorded as a failed job, so the rollout is not reported as successfully verified." }
+      ],
+      correct: 3,
+      tags: ["manage-implementation", "ci-cd", "deployment-verification", "advanced"],
+      source: S.CLOUD_DEPLOY_VERIFY
+    },
+    {
+      id: "implementation-gke-blue-green-node-upgrade-soak",
+      prompt: "A critical GKE workload is sensitive to kernel and node-image changes. The team accepts temporary extra node capacity and wants to run on the upgraded nodes for a defined soak period while retaining a rapid path back to the old node pool. Which node upgrade strategy best fits?",
+      answers: [
+        { text: "Configure a blue-green node-pool upgrade with an appropriate soak duration and roll back during the soak if the workload regresses", explanation: "Correct. Blue-green upgrades create a new pool, move workloads to it, and retain the old pool through a configurable soak phase. The upgrade can be rolled back before the old pool is deleted." },
+        { text: "Use a surge upgrade with maxSurge set to the size of the pool and maxUnavailable set to zero", explanation: "Incorrect. Surge settings can add temporary nodes and limit disruption, but they do not retain a separate old pool for a configurable post-migration soak and rollback phase." },
+        { text: "Set a maintenance window and assume GKE preserves the old node image for rollback after the upgrade", explanation: "Incorrect. A maintenance window controls when maintenance can occur; it does not select a blue-green upgrade strategy or retain the previous pool for a soak-based rollback." },
+        { text: "Disable node auto-upgrades and manually recreate nodes one at a time from the new image", explanation: "Incorrect. Manual replacement can control sequencing, but it does not provide GKE's managed blue-green phases, configured soak, and built-in rollback operation." }
+      ],
+      correct: 0,
+      tags: ["manage-implementation", "containers", "gke-upgrades", "advanced"],
+      source: S.GKE_NODE_UPGRADES
     }
   ];
 })();

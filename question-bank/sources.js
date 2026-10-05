@@ -2,13 +2,14 @@
   "use strict";
 
   const ACCESS_DATE = "accessed-2026-10-04";
+  const CURRENT_ACCESS_DATE = "accessed-2026-10-05";
   const GOOGLE_CLOUD_DOCS_LICENSE = "CC BY 4.0";
 
-  function googleCloudSource(name, url) {
+  function googleCloudSource(name, url, accessDate = ACCESS_DATE) {
     return Object.freeze({
       name: `Google Cloud documentation: ${name}`,
       url,
-      commit: ACCESS_DATE,
+      commit: accessDate,
       license: GOOGLE_CLOUD_DOCS_LICENSE
     });
   }
@@ -101,6 +102,26 @@
     CLOUD_DEPLOY_CANARY: googleCloudSource("Cloud Deploy canary deployments", "https://cloud.google.com/deploy/docs/deployment-strategies/canary"),
     GKE_REGIONAL: googleCloudSource("GKE regional clusters", "https://cloud.google.com/kubernetes-engine/docs/concepts/regional-clusters"),
     CLOUD_DNS_ROUTING: googleCloudSource("Cloud DNS routing policies and health checks", "https://cloud.google.com/dns/docs/routing-policies-overview"),
-    CLOUD_SQL_DR: googleCloudSource("Cloud SQL disaster recovery", "https://cloud.google.com/sql/docs/postgres/intro-to-cloud-sql-disaster-recovery")
+    CLOUD_SQL_DR: googleCloudSource("Cloud SQL disaster recovery", "https://cloud.google.com/sql/docs/postgres/intro-to-cloud-sql-disaster-recovery"),
+    BIGQUERY_OMNI: googleCloudSource("BigQuery Omni overview", "https://cloud.google.com/bigquery/docs/omni-introduction", CURRENT_ACCESS_DATE),
+    CLOUD_RUN_JOBS: googleCloudSource("Cloud Run jobs", "https://cloud.google.com/run/docs/create-jobs", CURRENT_ACCESS_DATE),
+    GKE_MULTICLUSTER_GATEWAY: googleCloudSource("GKE multi-cluster Gateways", "https://cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-gateways", CURRENT_ACCESS_DATE),
+    CLOUD_COMPOSER: googleCloudSource("Managed Service for Apache Airflow overview", "https://cloud.google.com/composer/docs/composer-3/composer-overview", CURRENT_ACCESS_DATE),
+    CLOUD_RUN_VPC: googleCloudSource("Cloud Run VPC connectivity options", "https://cloud.google.com/run/docs/configuring/connecting-vpc", CURRENT_ACCESS_DATE),
+    RESOURCE_TAGS: googleCloudSource("Resource Manager tags and mandatory tag enforcement", "https://cloud.google.com/resource-manager/docs/tags/tags-overview", CURRENT_ACCESS_DATE),
+    VM_MANAGER_PATCH: googleCloudSource("VM Manager patching", "https://cloud.google.com/compute/vm-manager/docs/patch", CURRENT_ACCESS_DATE),
+    COMPACT_PLACEMENT: googleCloudSource("compact placement policies", "https://cloud.google.com/compute/docs/instances/use-compact-placement-policies", CURRENT_ACCESS_DATE),
+    CLOUD_EKM: googleCloudSource("Cloud External Key Manager", "https://cloud.google.com/kms/docs/ekm", CURRENT_ACCESS_DATE),
+    ACCESS_APPROVAL: googleCloudSource("Access Approval overview", "https://cloud.google.com/assured-workloads/access-approval/docs/overview", CURRENT_ACCESS_DATE),
+    SCC_ATTACK_PATHS: googleCloudSource("Security Command Center attack paths", "https://cloud.google.com/security-command-center/docs/attack-exposure-learn", CURRENT_ACCESS_DATE),
+    CLOUD_SQL_IAM_AUTH: googleCloudSource("Cloud SQL IAM database authentication", "https://cloud.google.com/sql/docs/postgres/iam-authentication", CURRENT_ACCESS_DATE),
+    BIGQUERY_BI_ENGINE: googleCloudSource("BigQuery BI Engine", "https://cloud.google.com/bigquery/docs/bi-engine-intro", CURRENT_ACCESS_DATE),
+    CLOUD_PROFILER: googleCloudSource("Cloud Profiler overview", "https://cloud.google.com/profiler/docs/about-profiler", CURRENT_ACCESS_DATE),
+    MONITORING_METRICS_SCOPE: googleCloudSource("Cloud Monitoring metrics scopes", "https://cloud.google.com/monitoring/settings/multiple-projects", CURRENT_ACCESS_DATE),
+    CLOUD_DEPLOY_VERIFY: googleCloudSource("Cloud Deploy deployment verification", "https://cloud.google.com/deploy/docs/verify-deployment", CURRENT_ACCESS_DATE),
+    GKE_NODE_UPGRADES: googleCloudSource("GKE node upgrade strategies", "https://cloud.google.com/kubernetes-engine/docs/concepts/node-pool-upgrade-strategies", CURRENT_ACCESS_DATE),
+    CLOUD_RUN_SERVICE_HEALTH: googleCloudSource("Cloud Run cross-region service health", "https://cloud.google.com/run/docs/configuring/configure-service-health", CURRENT_ACCESS_DATE),
+    PUBSUB_DEAD_LETTER: googleCloudSource("Pub/Sub dead-letter topics", "https://cloud.google.com/pubsub/docs/dead-letter-topics", CURRENT_ACCESS_DATE),
+    STORAGE_SOFT_DELETE: googleCloudSource("Cloud Storage soft delete", "https://cloud.google.com/storage/docs/soft-delete", CURRENT_ACCESS_DATE)
   });
 })();

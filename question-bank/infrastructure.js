@@ -185,6 +185,45 @@
       correct: 0,
       tags: ["manage-provision", "networking", "hybrid-networking", "advanced"],
       source: S.NETWORK_CONNECTIVITY_CENTER
+    },
+    {
+      id: "infrastructure-mandatory-resource-tags",
+      prompt: "An organization requires every newly created supported Compute Engine instance to carry a centrally defined environment tag before creation succeeds. Teams must not bypass the requirement by using a deployment path outside the approved Terraform pipeline. Which control should enforce it?",
+      answers: [
+        { text: "Require a standard label in the Terraform module and reject pull requests without it", explanation: "Incorrect. This validates one infrastructure pipeline but can be bypassed by other APIs or deployment tools, and labels are not the tag bindings used for tag-based policy enforcement." },
+        { text: "Use a custom Organization Policy constraint to require the tag on supported resource types", explanation: "Correct. A custom Organization Policy can enforce mandatory tags at resource creation for supported types, so the check applies at the Google Cloud resource API rather than only in one deployment pipeline." },
+        { text: "Add the tag key to the organization and ask project owners to bind it after instances are created", explanation: "Incorrect. Defining a tag key and relying on post-creation procedures does not block an instance from being created without the required binding." },
+        { text: "Apply an IAM condition to instance-creation roles that checks the value of a resource label", explanation: "Incorrect. An IAM condition on role grants is not the documented organization-wide mechanism for requiring tag bindings at creation across supported resource types." }
+      ],
+      correct: 1,
+      tags: ["manage-provision", "governance", "tags", "advanced"],
+      source: S.RESOURCE_TAGS
+    },
+    {
+      id: "infrastructure-mig-patch-template-drift",
+      prompt: "A production managed instance group automatically scales and repairs failed VMs. Security patches must remain applied after scale-out or repair, and every VM must converge on a reproducible approved OS baseline. What should the team do?",
+      answers: [
+        { text: "Run a VM Manager patch job against current MIG instances and leave the instance template unchanged", explanation: "Incorrect. Patching current instances does not change the source template. A repaired or newly scaled VM is created from that template and can return to an unpatched baseline." },
+        { text: "Disable MIG repair and autoscaling, patch each VM manually, then re-enable both settings", explanation: "Incorrect. This interrupts managed repair and scaling during maintenance, and subsequent replacements can still use the unchanged unpatched template." },
+        { text: "Build and test a patched VM image, update the MIG instance template to that image, and roll out the template", explanation: "Correct. A patched image in the instance template makes repairs and future scale-outs use the approved OS baseline; a controlled MIG rollout replaces existing instances with that configuration." },
+        { text: "Attach a recurring VM Manager patch deployment to the MIG and assume patched VMs are preserved during scale-in", explanation: "Incorrect. VM Manager warns that MIG repairs or autoscaling can replace patched instances with VMs from the unchanged template, so in-place patching alone does not preserve the baseline." }
+      ],
+      correct: 2,
+      tags: ["manage-provision", "compute", "patch-management", "advanced"],
+      source: S.VM_MANAGER_PATCH
+    },
+    {
+      id: "infrastructure-compute-compact-placement-hpc",
+      prompt: "A tightly coupled MPI workload runs on many Compute Engine VMs in one zone and exchanges data between nodes continuously. The team prioritizes low east-west network latency over protection from a correlated zone failure and has no host-isolation requirement. Which placement design should it evaluate?",
+      answers: [
+        { text: "A spread placement policy across separate failure domains", explanation: "Incorrect. Spread placement improves resilience by separating instances, but it conflicts with the requirement to place communicating VMs close together for lower latency." },
+        { text: "Sole-tenant nodes without a placement policy", explanation: "Incorrect. Sole tenancy provides dedicated host occupancy for isolation or licensing needs, but it does not by itself guarantee the compact placement requested." },
+        { text: "A zonal capacity reservation for each VM without a placement policy", explanation: "Incorrect. Reservations provide capacity assurance, not physical proximity between VMs, so they do not directly reduce the application's east-west latency." },
+        { text: "A compact placement policy for the VM group", explanation: "Correct. A compact placement policy places instances physically close within the zone to reduce network latency, matching the workload's communication pattern and stated failure tradeoff." }
+      ],
+      correct: 3,
+      tags: ["manage-provision", "compute", "placement", "advanced"],
+      source: S.COMPACT_PLACEMENT
     }
   ];
 })();

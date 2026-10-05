@@ -172,6 +172,45 @@
       correct: 1,
       tags: ["reliability", "databases", "disaster-recovery", "advanced"],
       source: S.CLOUD_SQL_DR
+    },
+    {
+      id: "reliability-cloud-run-cross-region-service-health",
+      prompt: "A stateless public Cloud Run API must continue serving if its primary region becomes unhealthy and automatically resume using that region after recovery. The service can run in two regions, and clients must keep one hostname. Which design provides managed regional failover?",
+      answers: [
+        { text: "Create two regional Cloud Run URLs and publish both as equal-weight Cloud DNS records with a short TTL", explanation: "Incorrect. Equal-weight DNS can send clients to an unhealthy region, and cached DNS answers prevent it from providing prompt health-aware failover and failback." },
+        { text: "Deploy the service in both regions with readiness probes, configure regional serverless NEGs, and route through a global external Application Load Balancer with Cloud Run service health", explanation: "Correct. Regional Cloud Run services and serverless NEGs provide the backends. Cloud Run service health reports regional readiness to the load balancer, which shifts traffic away from an unhealthy region and restores traffic when it becomes healthy." },
+        { text: "Deploy the service in one region behind a global external Application Load Balancer with two serverless NEGs for the same regional service", explanation: "Incorrect. Multiple frontends for a single regional service do not provide a healthy application backend in another region when the primary region fails." },
+        { text: "Deploy the service in two regions behind a global load balancer but omit readiness and service health configuration", explanation: "Incorrect. A global load balancer alone does not establish the required Cloud Run regional service-health signal for shifting traffic away from an unhealthy service region." }
+      ],
+      correct: 1,
+      tags: ["reliability", "serverless", "disaster-recovery", "advanced"],
+      source: S.CLOUD_RUN_SERVICE_HEALTH
+    },
+    {
+      id: "reliability-pubsub-dead-letter-poison-messages",
+      prompt: "A Pub/Sub subscriber repeatedly fails on malformed messages, delaying useful work. The team wants failed messages routed to a separate topic after a bounded number of delivery attempts, while retaining a replay path and avoiding assumptions about an exact attempt count. What should it configure?",
+      answers: [
+        { text: "Set the source subscription's acknowledgment deadline to zero so Pub/Sub immediately publishes failed messages to another topic", explanation: "Incorrect. An acknowledgment deadline controls when an unacknowledged message becomes eligible for redelivery; it does not route the message to a separate topic." },
+        { text: "Enable exactly-once delivery on the source subscription and treat it as protection against poison-message retry loops", explanation: "Incorrect. Exactly-once delivery addresses redelivery of successfully acknowledged messages within its supported scope; it does not route a repeatedly failing message to a separate topic." },
+        { text: "Set a dead-letter policy and maximum delivery attempts on the source subscription, grant the Pub/Sub service agent Pub/Sub Subscriber on the source subscription and Pub/Sub Publisher on the dead-letter topic, then monitor and replay the dead-letter subscription", explanation: "Correct. The subscription dead-letter policy forwards undeliverable messages after the configured attempt threshold when the Pub/Sub service agent has the required permissions. Forwarding and attempt counts are best effort, so the subscriber should not treat the threshold as an exact-once boundary." },
+        { text: "Create a snapshot of the source subscription each time a message fails and seek the subscription after processing", explanation: "Incorrect. Snapshots and seek support replaying acknowledged messages, but they do not automatically isolate individual repeatedly failing messages from the active subscription." }
+      ],
+      correct: 2,
+      tags: ["reliability", "messaging", "pubsub", "advanced"],
+      source: S.PUBSUB_DEAD_LETTER
+    },
+    {
+      id: "reliability-cloud-storage-soft-delete-recovery",
+      prompt: "A bucket must let operators recover objects for 30 days after accidental or malicious deletion or overwrite, including when an authorized user deletes prior object versions. The policy should not block ordinary delete requests during that recovery window. Which feature best fits?",
+      answers: [
+        { text: "Enable Object Versioning and grant object deletion only to bucket administrators", explanation: "Incorrect. Versioning preserves noncurrent generations, but a sufficiently privileged principal can delete those generations; it does not provide the requested separate soft-deleted recovery period." },
+        { text: "Lock a 30-day Bucket Lock retention policy", explanation: "Incorrect. Bucket Lock prevents deletion or alteration before the retention period is met, which conflicts with the requirement to allow delete requests while preserving a recovery copy." },
+        { text: "Create a daily Storage Transfer Service copy to a second bucket and grant delete access to the same administrators", explanation: "Incorrect. A daily copy can leave up to a day of changes unrecoverable and gives the same administrators a path to delete the backup; it does not provide the immediate configured soft-delete recovery window." },
+        { text: "Configure a 30-day Cloud Storage soft delete retention duration and use object restore when needed", explanation: "Correct. Soft delete retains deleted or overwritten objects in a restorable state for the configured period, including objects deleted by an authorized user, without rejecting the original delete request." }
+      ],
+      correct: 3,
+      tags: ["reliability", "storage", "data-protection", "advanced"],
+      source: S.STORAGE_SOFT_DELETE
     }
   ];
 })();

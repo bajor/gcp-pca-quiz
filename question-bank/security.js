@@ -224,6 +224,58 @@
       correct: 2,
       tags: ["security-compliance", "pki", "certificates", "advanced"],
       source: S.CA_SERVICE_EXTERNAL_ROOT
+    },
+    {
+      id: "security-cloud-ekm-external-key-control",
+      prompt: "A supported Google Cloud storage service must use an integrated customer-managed encryption key, but policy requires the cryptographic key material to stay in the company's external key manager and never be sent to Google. The business accepts that service reads or writes might fail while the external manager is unavailable. Which design best fits?",
+      answers: [
+        { text: "Configure Cloud External Key Manager with a key hosted by the approved external key manager", explanation: "Correct. Cloud EKM lets a supported Google Cloud service use an externally managed key whose material remains outside Google. The customer-owned service becomes an availability dependency for cryptographic operations." },
+        { text: "Create a Cloud HSM key in the project and grant the security team exclusive key administration", explanation: "Incorrect. Cloud HSM protects key material in a Google Cloud HSM, but the material is not retained in the company's external key manager." },
+        { text: "Import the external key material into Cloud KMS and disable automatic rotation", explanation: "Incorrect. Imported key material is managed for use by Cloud KMS and does not satisfy the requirement that the material remain in the external manager and never be sent to Google." },
+        { text: "Use customer-supplied encryption keys and have every application submit the key with each storage request", explanation: "Incorrect. Customer-supplied keys require application-managed key delivery and do not provide the integrated Cloud KMS and external-key-manager workflow requested." }
+      ],
+      correct: 0,
+      tags: ["security-compliance", "encryption", "key-management", "advanced"],
+      source: S.CLOUD_EKM
+    },
+    {
+      id: "security-google-personnel-approval-and-audit",
+      prompt: "For covered, non-auto-approved requests, a regulator requires customers to explicitly authorize Google personnel access to Customer Data. The company must also review records of the actual actions taken after approval. Which control combination meets both requirements?",
+      answers: [
+        { text: "Enable Access Transparency only and treat each log entry as approval granted before access", explanation: "Incorrect. Access Transparency records provider actions after they occur; it does not require customer approval before covered access." },
+        { text: "Enable Access Approval for the supported services and Access Transparency to log Google personnel actions", explanation: "Correct. Access Approval provides a customer authorization gate for covered access requests. Access Transparency records the actions taken by Google personnel, providing the audit trail after access is approved." },
+        { text: "Enable Access Approval only and use Cloud Audit Logs to record every Google personnel action", explanation: "Incorrect. Access Approval controls covered access requests, but Cloud Audit Logs are not the provider-action log. Access Transparency is the control for recording Google personnel actions." },
+        { text: "Require customer administrators to grant Google support engineers temporary project IAM roles", explanation: "Incorrect. Project IAM grants customer principals access to resources; it is not the managed request-and-approval workflow for Google personnel access to Customer Data." }
+      ],
+      correct: 1,
+      tags: ["security-compliance", "audit", "provider-access", "advanced"],
+      source: S.ACCESS_APPROVAL
+    },
+    {
+      id: "security-scc-attack-path-to-high-value-data",
+      prompt: "A security team already receives individual vulnerability and misconfiguration findings. Its Security Command Center tier includes attack path simulations. It now needs to prioritize findings by whether an attacker could combine IAM grants, network exposure, and vulnerabilities to reach a designated high-value data store. Which capability should it use?",
+      answers: [
+        { text: "Security Health Analytics findings sorted only by severity", explanation: "Incorrect. Severity sorting helps prioritize individual posture findings but does not simulate how multiple relationships combine into an attack path to a high-value resource." },
+        { text: "Cloud Asset Inventory exports joined to vulnerability scan results in a spreadsheet", explanation: "Incorrect. Asset and vulnerability data can be analyzed manually, but that does not provide SCC's modeled attack paths and exposure scores across resource relationships." },
+        { text: "Security Command Center attack path simulations with a defined high-value resource set", explanation: "Correct. Attack path simulations model relationships such as IAM, networking, misconfigurations, and vulnerabilities to show plausible routes to high-value resources and prioritize exposed findings." },
+        { text: "IAM Recommender applied to remove every role with broad permissions", explanation: "Incorrect. IAM Recommender identifies certain excessive access grants, but it does not model network exposure and vulnerabilities together as paths to a designated high-value resource." }
+      ],
+      correct: 2,
+      tags: ["security-compliance", "threat-detection", "risk-prioritization", "advanced"],
+      source: S.SCC_ATTACK_PATHS
+    },
+    {
+      id: "security-cloud-sql-automatic-iam-db-auth",
+      prompt: "A Compute Engine service must connect to Cloud SQL for PostgreSQL without a static database password. Its service account should authenticate as a database user with short-lived, automatically refreshed credentials, while network transport is encrypted. Which setup is appropriate?",
+      answers: [
+        { text: "Grant Cloud SQL Client to the service account and use that role as the PostgreSQL username and password", explanation: "Incorrect. Cloud SQL Client permits connection through a connector but is not itself a database login identity or a PostgreSQL password." },
+        { text: "Create a built-in PostgreSQL user with a long random password in Secret Manager and rely on the Auth Proxy to replace password authentication", explanation: "Incorrect. The Auth Proxy secures and authorizes the connection path, but it does not convert a built-in database username and password into IAM database authentication." },
+        { text: "Assign a private IP address to the instance and authorize the VM subnet, without changing database authentication", explanation: "Incorrect. Private IP and network authorization control reachability, but they do not replace the database password with an IAM-authenticated user or automatically refresh login tokens." },
+        { text: "Enable IAM database authentication, create the service account as an IAM database user, grant Cloud SQL Client and Cloud SQL Instance User as needed, and connect with automatic IAM authentication through the Cloud SQL Auth Proxy", explanation: "Correct. IAM database authentication uses the workload identity for database login. The proxy supplies and refreshes short-lived tokens and encrypts the connection; Cloud SQL Client authorizes instance connectivity and Instance User supplies the IAM login permission. Database privileges still need to be granted in PostgreSQL." }
+      ],
+      correct: 3,
+      tags: ["security-compliance", "database-security", "iam", "advanced"],
+      source: S.CLOUD_SQL_IAM_AUTH
     }
   ];
 })();
